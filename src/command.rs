@@ -1,4 +1,4 @@
-use crate::types::Handler;
+use crate::conf::ProgramOptions;
 
 pub struct RunOptions {
   pub program_name: &'static str,
@@ -7,6 +7,14 @@ pub struct RunOptions {
   pub description: &'static str,
 }
 
+#[derive(Debug)]
+pub struct CommandArgs {
+  pub commands: Vec<String>,
+  pub flags: Vec<(String, String)>,
+  pub conf: ProgramOptions
+}
+
+pub type Handler = fn(args: CommandArgs);
 
 #[derive(Debug, Clone)]
 pub struct CliCommand {

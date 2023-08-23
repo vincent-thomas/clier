@@ -38,6 +38,11 @@ impl Cli {
   }
 }
 
+pub trait CommandBuilder {
+  fn commands(self, commands: Vec<Command>) -> Self;
+  fn command(self, command: Command) -> Self;
+}
+
 impl CommandBuilder for Cli {
   fn commands(mut self, commands: Vec<Command>) -> Self {
     self.commands = Some(commands);
@@ -50,9 +55,4 @@ impl CommandBuilder for Cli {
     self.commands = Some(commands);
     self
   }
-}
-
-pub trait CommandBuilder {
-  fn commands(self, commands: Vec<Command>) -> Self;
-  fn command(self, command: Command) -> Self;
 }
