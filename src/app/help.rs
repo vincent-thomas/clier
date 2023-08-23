@@ -1,7 +1,6 @@
-use crate::Command;
-use crate::ProgramOptions;
+use crate::{Command, App};
 
-pub fn use_help(commands: Vec<Command>, options: ProgramOptions) {
+pub fn use_help(commands: Vec<Command>, options: App) {
     let longest_c_name = commands
         .iter()
         .map(|value| value.name.len())
