@@ -1,0 +1,15 @@
+[package]
+name = "clier"
+version = "0.0.1"
+edition = "2021"
+authors = ["Vincent Thomas"]
+description = "A command line parser and framework for rust built in mind of extendability"
+license = "MIT"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+thiserror = "1.0.30"
+
+[features]
+hooks = []
