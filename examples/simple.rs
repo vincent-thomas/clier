@@ -1,7 +1,7 @@
 
 use std::env;
 
-use clier::{CliBuilder, Command, Runnable, hooks::{use_flag, OutputCheck}};
+use clier::{CliBuilder, Command, Runnable, hooks::use_flag};
 
 fn main() {
 

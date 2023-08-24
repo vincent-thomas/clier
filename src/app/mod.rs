@@ -6,16 +6,7 @@ pub use runner::*;
 mod help;
 pub use help::*;
 
-#[derive(Debug, Clone, Copy)]
-pub enum Spacing {
-  Dots,
-  Space,
-  Dot,
-  Custom(char)
-}
 pub(crate) mod format;
-
-
 
 #[derive(Debug, Clone)]
 pub struct App {

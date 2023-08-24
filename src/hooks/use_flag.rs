@@ -2,26 +2,14 @@ pub struct Flag {
   pub value: Option<String>,
 }
 
-pub trait OutputCheck {
-  fn is_true(&self) -> bool;
-  fn is_false(&self) -> bool;
-}
-
-pub trait Transform {
-  fn to_bool(self) -> bool;
-}
-
-impl OutputCheck for Flag {
-  fn is_true(&self) -> bool {
+impl Flag {
+  pub fn is_true(&self) -> bool {
     self.value.clone().unwrap_or("false".to_string()) == "true"
   }
-  fn is_false(&self) -> bool {
+  pub fn is_false(&self) -> bool {
     self.value.clone().unwrap_or("true".to_string()) == "false"
   }
-}
-
-impl Transform for Flag {
-  fn to_bool(self) -> bool {
+  pub fn to_bool(self) -> bool {
       let value = self.value.unwrap_or("false".to_string());
       value == "false"
   }
