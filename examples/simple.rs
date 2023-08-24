@@ -1,12 +1,13 @@
 
 use std::env;
 
-use clier::{CliBuilder, Command, Runnable, hooks::use_flag};
+use clier::{CliBuilder, Command, Runnable};
+use clier::hooks::use_flag;
 
 fn main() {
 
   let clier_builder = CliBuilder::new()
-    .meta("things", "This is the description", "1.0.0", "This is the usage");
+    .meta("clier-example-simple", "This is the description", "1.0.0", "<subcommand> [--flag=value]");
 
   let app = clier_builder
   .command(Command {

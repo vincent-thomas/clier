@@ -1,6 +1,6 @@
 [package]
 name = "clier"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 authors = ["Vincent Thomas"]
 description = "A command line parser and framework for rust built in mind of extendability"
