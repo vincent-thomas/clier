@@ -1,6 +1,6 @@
 mod builder;
 use crate::command::Command;
-use self::format::Args;
+pub use self::format::Args;
 mod runner;
 pub use runner::*;
 mod help;
