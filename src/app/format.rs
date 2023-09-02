@@ -1,9 +1,15 @@
 use std::path::Path;
 
 pub fn remove_ex(args: &mut Vec<String>) -> Vec<String> {
-    let file = Path::new(args.get(0).unwrap());
+    let maybe_file = args.get(0).unwrap();
+    let path = if std::env::consts::OS == "windows" && maybe_file.ends_with(".exe") {
+        format!("{maybe_file}.exe")
+    } else {
+        args.get(0).unwrap().clone()
+    };
+    let file = Path::new(&path); //args.get(0).unwrap());
     let maybe_ex = if std::env::consts::OS == "windows" {
-        file.extension().unwrap_or_default() == "exe"
+        file.extension().unwrap() == "exe"
     } else {
         Path::new(file).is_file()
     };
