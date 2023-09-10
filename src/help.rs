@@ -34,7 +34,7 @@ fn help_renderer(
     println!("{}", help_text.join("\n"));
 }
 
-pub fn render_help(commands: &[Command], args: &[String], options: CliMeta) {
+pub fn help(commands: &[Command], args: &[String], options: CliMeta) {
     let prog_name = if std::env::consts::OS == "windows" {
         format!("{}.exe", options.name)
     } else {
@@ -47,11 +47,7 @@ pub fn render_help(commands: &[Command], args: &[String], options: CliMeta) {
         help_renderer(
             child_command.children,
             prog_name,
-            if let Some(usage) = child_command.usage {
-                Some(usage.to_string())
-            } else {
-                None
-            },
+            child_command.usage.map(|usage| usage.to_string()),
             options.version,
             options.description,
         );

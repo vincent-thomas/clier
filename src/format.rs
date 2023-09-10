@@ -48,13 +48,13 @@ fn parse_flags(raw_flags: &[String]) -> Vec<(String, String)> {
             let flag: Vec<&str> = flag.split('=').collect();
             let key = flag.first().unwrap();
 
-            key.starts_with("-") && key[1..].len() == 1
+            key.starts_with('-') && key[1..].len() == 1
                 || key.starts_with("--") && key[2..].len() != 1
         })
         .map(|v| -> String {
             let flag: Vec<&str> = v.split('=').collect();
             let key = *flag.first().unwrap();
-            let is_short = key.starts_with("-") && key[1..].len() == 1;
+            let is_short = key.starts_with('-') && key[1..].len() == 1;
             if is_short {
                 v[1..].to_string()
             } else {
@@ -87,7 +87,10 @@ pub(crate) fn prepare_vargs(args_with_ex: &[String]) -> Args {
     }
 }
 
-pub fn match_command(registered_commands: &[Command], commands: &[String]) -> Option<Command> {
+pub(crate) fn match_command(
+    registered_commands: &[Command],
+    commands: &[String],
+) -> Option<Command> {
     let mut command_matcher = HashMap::new();
     for command in registered_commands.iter() {
         let mut command_name = command.name.clone().to_string();

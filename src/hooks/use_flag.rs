@@ -1,18 +1,39 @@
+use std::fmt;
+
 #[derive(Debug)]
 pub struct Flag {
-    pub value: Option<String>,
+    value: Option<String>,
+}
+
+#[derive(Debug)]
+pub enum FlagError {
+    InvalidFormat,
+    Unexisting,
 }
 
 impl Flag {
-    pub fn is_true(&self) -> bool {
-        self.value.clone().unwrap_or("false".to_string()) == "true"
+    pub fn into_bool(self) -> bool {
+        self.try_into().unwrap_or(false)
     }
-    pub fn is_false(&self) -> bool {
-        self.value.clone().unwrap_or("true".to_string()) == "false"
+}
+
+impl TryInto<bool> for Flag {
+    type Error = FlagError;
+    fn try_into(self) -> Result<bool, Self::Error> {
+        match self.value {
+            Some(value) => match value.as_str() {
+                "true" => Ok(true),
+                "false" => Ok(false),
+                _ => Err(FlagError::InvalidFormat),
+            },
+            None => Err(FlagError::Unexisting),
+        }
     }
-    pub fn to_bool(self) -> bool {
-        let value = self.value.unwrap_or("false".to_string());
-        value == "false"
+}
+
+impl fmt::Display for Flag {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.value.clone().unwrap_or("Empty".to_string()))
     }
 }
 
@@ -55,39 +76,3 @@ pub fn use_flag(name: &'static str, short: Option<char>, args: &[(String, String
         value: Some(selected_flag.1),
     }
 }
-
-// #[cfg(test)]
-// mod use_flag_test {
-//     use super::*;
-//     #[test]
-//     fn good_input() {
-//         let result = use_flag("name", &[("name".to_string(), "true".to_string())]);
-//         assert!(result.value.unwrap() == "true".to_string());
-
-//         let result = use_flag("name", &[("name".to_string(), "false".to_string())]);
-//         assert_eq!(result.value.unwrap(), "false".to_string());
-
-//         let result = use_flag("name", &[("name".to_string(), "1234".to_string())]);
-//         assert!(result.value.unwrap() == "1234".to_string());
-//     }
-//     #[test]
-//     fn bad_input() {
-//         let result = use_flag("nam", &[("name".to_string(), "true".to_string())]);
-//         assert!(result.value.is_none());
-//     }
-// }
-
-// #[cfg(test)]
-// mod impl_use_flag_test {
-//     use super::*;
-//     #[test]
-//     fn good_input() {
-//         let base = use_flag("test", &[("test".to_string(), "true".to_string())]);
-//         assert!(base.is_true());
-//     }
-//     #[test]
-//     fn bad_input() {
-//         let base = use_flag("test", &[("test".to_string(), "false".to_string())]);
-//         assert!(base.is_false());
-//     }
-// }
