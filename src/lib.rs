@@ -1,9 +1,6 @@
 mod cli;
 pub use cli::*;
 
-mod cli_builder;
-pub use cli_builder::*;
-
 mod command;
 pub mod error;
 mod format;

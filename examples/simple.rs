@@ -1,5 +1,4 @@
-use clier::error::ClierError;
-use clier::hooks::{use_flag, FlagError};
+use clier::hooks::use_flag;
 use clier::{CliMeta, Clier, Command, Runnable};
 use std::env::args;
 
@@ -11,23 +10,21 @@ fn main() {
         usage: None,
     };
 
-    let cli = Clier::new().parse(args().collect());
+    let cli = Clier::parse(args().collect());
 
-    let output = cli
+    let _: Result<i32, clier::error::Error> = cli
         .meta(meta)
-        .add_command(Command {
-            name: "test",
-            usage: Some("test"),
-            description: "detta är hur man gör",
-            handler: |value| {
-                let test = use_flag("test", Some('t'), &value.flags);
-                let value: Result<bool, FlagError> = test.try_into();
-                println!("Test: {:?}", value);
+        .add_command(Command::new(
+            "test",
+            "detta är hur man gör",
+            Some("test"),
+            |value| {
+                let test = use_flag("test", Some('t'), &value.flags)
+                    .try_into()
+                    .unwrap_or_else(|_| "".to_string());
+                println!("Test: {:?}", test);
+                0
             },
-            children: None,
-        })
-        .run()
-        .unwrap();
-
-    std::process::exit(output)
+        ))
+        .run();
 }

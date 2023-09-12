@@ -1,6 +1,4 @@
-use std::fmt;
-
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Flag {
     value: Option<String>,
 }
@@ -9,12 +7,7 @@ pub struct Flag {
 pub enum FlagError {
     InvalidFormat,
     Unexisting,
-}
-
-impl Flag {
-    pub fn into_bool(self) -> bool {
-        self.try_into().unwrap_or(false)
-    }
+    ParseIntError,
 }
 
 impl TryInto<bool> for Flag {
@@ -30,10 +23,29 @@ impl TryInto<bool> for Flag {
         }
     }
 }
+impl TryInto<i32> for Flag {
+    type Error = FlagError;
+    fn try_into(self) -> Result<i32, Self::Error> {
+        match self.value {
+            Some(value) => value.parse::<i32>().map_err(|_| FlagError::ParseIntError),
+            None => Err(FlagError::Unexisting),
+        }
+    }
+}
 
-impl fmt::Display for Flag {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.value.clone().unwrap_or("Empty".to_string()))
+impl TryInto<String> for Flag {
+    type Error = FlagError;
+    fn try_into(self) -> Result<String, Self::Error> {
+        match self.value {
+            Some(value) => Ok(value),
+            None => Err(FlagError::Unexisting),
+        }
+    }
+}
+
+impl Flag {
+    pub fn is_empty(self) -> bool {
+        self.value.is_some() && self.value.unwrap() == ""
     }
 }
 

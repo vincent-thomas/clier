@@ -1,5 +1,6 @@
 use crate::{Args, Command};
-use std::{collections::HashMap, path::Path};
+use std::collections::HashMap;
+use std::path::Path;
 
 fn remove_ex(args: &mut Vec<String>) -> Vec<String> {
     let maybe_file = args.get(0).unwrap();

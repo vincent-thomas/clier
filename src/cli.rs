@@ -1,7 +1,6 @@
-use crate::error::ClierError;
+use crate::error::Error;
 use crate::format::match_command;
 use crate::help;
-use crate::hooks::use_flag;
 use crate::{Args, Command};
 
 #[derive(Debug, Clone)]
@@ -13,7 +12,7 @@ pub struct CliMeta {
 }
 
 #[derive(Debug, Clone)]
-pub struct Cli {
+pub struct Clier {
     pub options: Option<CliMeta>,
     pub(crate) registered_commands: Vec<Command>,
     pub args: Args,
@@ -28,10 +27,10 @@ pub trait Runnable {
     where
         Self: Sized;
     fn commands(self, cmd: Vec<Command>) -> Self;
-    fn run(self) -> Result<i32, ClierError>;
+    fn run(self) -> Result<i32, Error>;
 }
 
-impl Runnable for Cli {
+impl Runnable for Clier {
     fn meta(mut self, meta: CliMeta) -> Self {
         self.options = Some(meta);
         self
@@ -40,7 +39,7 @@ impl Runnable for Cli {
         if cmd.name.contains('.') {
             panic!(
                 "{:?}",
-                ClierError::InvalidFormat(String::from("'name' can't contain '.'",))
+                Error::InvalidFormat(String::from("'name' can't contain '.'",))
             );
         }
         self.registered_commands.push(cmd);
@@ -52,29 +51,49 @@ impl Runnable for Cli {
         self
     }
 
-    fn run(self) -> Result<i32, ClierError> {
-        let is_version = use_flag("version", Some('v'), &self.args.flags).into_bool();
+    fn run(self) -> Result<i32, Error> {
+        if cfg!(feature = "hooks") {
+            use crate::hooks::use_flag;
 
-        if is_version {
-            if self.options.is_none() {
-                return Err(ClierError::NoMeta);
+            let is_version = use_flag("version", Some('v'), &self.args.flags).try_into();
+
+            if is_version.unwrap_or(false) {
+                if self.options.is_none() {
+                    return Err(Error::NoMeta);
+                }
+                println!("v{}", self.options.unwrap().version);
+                std::process::exit(0);
             }
-            println!("v{}", self.options.unwrap().version);
-            std::process::exit(0);
+            let is_help = use_flag("help", Some('h'), &self.args.flags)
+                .try_into()
+                .unwrap_or(false);
+            if is_help {
+                help(
+                    &self.registered_commands,
+                    &self.args.commands,
+                    self.options.expect("'meta' function is not called"),
+                );
+                return Ok(0);
+            }
         }
-
-        let is_help = use_flag("help", Some('h'), &self.args.flags).into_bool();
         let command_to_run = match_command(&self.registered_commands, &self.args.commands);
-
-        if is_help || command_to_run.clone().is_none() {
-            help(
-                &self.registered_commands,
-                &self.args.commands,
-                self.options.expect("'meta' function is not called"),
-            )
+        if let Some(command) = command_to_run {
+            let exit_code = (command.handler)(self.args);
+            Ok(exit_code)
+        } else {
+            Err(Error::NoCommandAndNoHooks)
         }
+    }
+}
 
-        (command_to_run.unwrap().handler)(self.args);
-        Ok(0)
+use crate::format::prepare_vargs;
+
+impl Clier {
+    pub fn parse(args: Vec<String>) -> Clier {
+        Clier {
+            options: None,
+            registered_commands: vec![],
+            args: prepare_vargs(&args),
+        }
     }
 }

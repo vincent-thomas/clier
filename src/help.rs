@@ -1,6 +1,5 @@
 use crate::format::match_command;
 use crate::{CliMeta, Command};
-use std::process::exit;
 
 fn help_renderer(
     root_command: Option<Vec<Command>>,
@@ -9,10 +8,10 @@ fn help_renderer(
     version: String,
     description: String,
 ) {
-    let mut help_text = vec![format!("{} v{}\n{}\n", name, version, description)];
+    let mut help_text = vec![format!("{} v{}\n{}", name, version, description)];
 
     if let Some(usage) = usage {
-        help_text.push(format!("Usage:\n  {} {}", name, usage));
+        help_text.push(format!("\nUsage:\n  {}{}", name, usage));
     }
 
     if let Some(commands) = root_command.clone() {
@@ -60,6 +59,4 @@ pub fn help(commands: &[Command], args: &[String], options: CliMeta) {
             options.description,
         )
     }
-
-    exit(0);
 }
