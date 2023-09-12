@@ -1,14 +1,8 @@
 [package]
 name = "clier"
-version = "0.2.0"
+version = "0.2.2"
 edition = "2021"
 authors = ["Vincent Thomas"]
 description = "A cli parser and framework for rust"
 license = "MIT"
 repository = "https://github.com/vincent-thomas/clier"
-
-[features]
-hooks = []
-default = ["cli", "help"]
-cli = []
-help = ["hooks"]

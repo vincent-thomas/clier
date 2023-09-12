@@ -11,7 +11,7 @@ fn help_renderer(
     let mut help_text = vec![format!("{} v{}\n{}", name, version, description)];
 
     if let Some(usage) = usage {
-        help_text.push(format!("\nUsage:\n  {}{}", name, usage));
+        help_text.push(format!("\nUsage:\n  {} {}", name, usage));
     }
 
     if let Some(commands) = root_command.clone() {
@@ -28,8 +28,8 @@ fn help_renderer(
         })
     }
     help_text.push("\nGlobal Flags:".to_string());
-    help_text.push("  --help     Shows this".to_string());
-    help_text.push("  --version  Shows version".to_string());
+    help_text.push("  --help, -h     Shows this".to_string());
+    help_text.push("  --version, -v  Shows version".to_string());
     println!("{}", help_text.join("\n"));
 }
 

@@ -52,31 +52,29 @@ impl Runnable for Clier {
     }
 
     fn run(self) -> Result<i32, Error> {
-        if cfg!(feature = "hooks") {
-            use crate::hooks::use_flag;
-
-            let is_version = use_flag("version", Some('v'), &self.args.flags).try_into();
-
-            if is_version.unwrap_or(false) {
-                if self.options.is_none() {
-                    return Err(Error::NoMeta);
-                }
-                println!("v{}", self.options.unwrap().version);
-                std::process::exit(0);
-            }
-            let is_help = use_flag("help", Some('h'), &self.args.flags)
-                .try_into()
-                .unwrap_or(false);
-            if is_help {
-                help(
-                    &self.registered_commands,
-                    &self.args.commands,
-                    self.options.expect("'meta' function is not called"),
-                );
-                return Ok(0);
-            }
-        }
         let command_to_run = match_command(&self.registered_commands, &self.args.commands);
+        use crate::hooks::use_flag;
+
+        let is_version = use_flag("version", Some('v'), &self.args.flags).try_into();
+
+        if is_version.unwrap_or(false) {
+            if self.options.is_none() {
+                return Err(Error::NoMeta);
+            }
+            println!("v{}", self.options.unwrap().version);
+            std::process::exit(0);
+        }
+        let is_help = use_flag("help", Some('h'), &self.args.flags)
+            .try_into()
+            .unwrap_or(false);
+        if is_help || command_to_run.is_none() {
+            help(
+                &self.registered_commands,
+                &self.args.commands,
+                self.options.expect("'meta' function is not called"),
+            );
+            return Ok(0);
+        }
         if let Some(command) = command_to_run {
             let exit_code = (command.handler)(self.args);
             Ok(exit_code)

@@ -1,5 +1,3 @@
-#![cfg(feature = "cli")] // Applies to the whole file
-
 mod app;
 
 use app::commands::generate::generate_command;
