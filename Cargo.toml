@@ -1,8 +1,13 @@
 [package]
 name = "clier"
-version = "0.2.2"
+version = "0.3.0"
 edition = "2021"
 authors = ["Vincent Thomas"]
 description = "A cli parser and framework for rust"
 license = "MIT"
 repository = "https://github.com/vincent-thomas/clier"
+
+[dependencies]
+serde = {version = "1.0.188", features = ["derive"]}
+serde_json = "1.0.106"
+thiserror = "1.0.48"

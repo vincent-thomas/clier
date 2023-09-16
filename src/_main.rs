@@ -1,14 +1,13 @@
 mod app;
 
 use app::commands::generate::generate_command;
-use clier::{CliMeta, Clier, Runnable};
-use std::env::args;
+use clier::{run::Runnable, CliMeta, Clier};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const NAME: &str = env!("CARGO_PKG_NAME");
 const DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
 
-fn main() {
+fn main() -> clier::ExitCode {
     let meta = CliMeta {
         name: NAME.to_string(),
         description: DESCRIPTION.to_string(),
@@ -16,12 +15,12 @@ fn main() {
         usage: None,
     };
 
-    let cli = Clier::parse(args().collect());
-    let result = cli.meta(meta).add_command(generate_command()).run();
-    match result {
-        Ok(output) => std::process::exit(output),
-        Err(err) => {
-            println!("Error: {:?}", err);
+    let cli = Clier::parse();
+    match cli.meta(meta).add_command(generate_command()).run() {
+        Ok(value) => value,
+        Err(value) => {
+            println!("Error: {:?}", value);
+            std::process::exit(1)
         }
     }
 }

@@ -1,30 +1,27 @@
-use clier::hooks::use_flag;
-use clier::{CliMeta, Clier, Command, Runnable};
-use std::env::args;
+use clier::run::Runnable;
+use clier::{CliMeta, Clier, ExitCode};
 
-fn main() {
-    let meta = CliMeta {
-        name: "clier-example-simple".to_string(),
-        description: "This is the description".to_string(),
-        version: "1.0.0".to_string(),
-        usage: None,
-    };
+use clier::command::Command;
+use clier::hooks::Flag;
 
-    let cli = Clier::parse(args().collect());
+fn main() -> ExitCode {
+  let meta = CliMeta {
+    name: "clier-example-simple".to_string(),
+    description: "This is the description".to_string(),
+    version: "1.0.0".to_string(),
+    usage: None,
+  };
+  let clier = Clier::parse();
 
-    let _: Result<i32, clier::error::Error> = cli
-        .meta(meta)
-        .add_command(Command::new(
-            "test",
-            "detta är hur man gör",
-            Some("test"),
-            |value| {
-                let test = use_flag("test", Some('t'), &value.flags)
-                    .try_into()
-                    .unwrap_or_else(|_| "".to_string());
-                println!("Test: {:?}", test);
-                0
-            },
-        ))
-        .run();
+  let exit_code = clier.meta(meta).add_command(test_command()).run();
+  exit_code.unwrap()
+}
+
+fn test_command() -> Command {
+  Command::new("test", "detta är hur man gör", |_args| {
+    println!("{:?}", _args);
+    0
+  })
+  .usage("test")
+  .flags(vec![Flag::new("tes", "testing".to_string()).short('t')])
 }

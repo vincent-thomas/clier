@@ -1,11 +1,11 @@
-mod cli;
-pub use cli::*;
-
-mod command;
+mod clier;
+pub use clier::*;
+pub mod command;
 pub mod error;
-mod format;
-mod help;
-pub use help::help;
-
+pub mod help;
 pub mod hooks;
-pub use command::*;
+mod prelude;
+pub mod run;
+
+mod format;
+mod utils;

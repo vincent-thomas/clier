@@ -1,24 +1,34 @@
-use crate::{Args, Command};
+use crate::{command::Command, Args};
 use std::collections::HashMap;
-use std::path::Path;
 
-fn remove_ex(args: &mut Vec<String>) -> Vec<String> {
-    let maybe_file = args.get(0).unwrap();
-    let path = if std::env::consts::OS == "windows" && maybe_file.ends_with(".exe") {
-        format!("{maybe_file}.exe")
-    } else {
-        args.get(0).unwrap().clone()
-    };
-    let file = Path::new(&path);
-    let maybe_ex = if std::env::consts::OS == "windows" {
-        file.extension().unwrap() == "exe"
-    } else {
-        Path::new(file).is_file()
-    };
-    if maybe_ex {
-        args.remove(0);
+pub(crate) fn match_command(
+    registered_commands: &[Command],
+    commands: &[String],
+) -> Option<Command> {
+    let mut command_matcher = HashMap::new();
+    for command in registered_commands.iter() {
+        let mut command_name = command.name.clone().to_string();
+        command_matcher.insert(command_name.clone(), command.clone());
+        let mut command_to_check = command.clone();
+
+        loop {
+            if command_to_check.clone().children.is_some()
+                && command_to_check.clone().children.unwrap().is_empty()
+            {
+                panic!("Use None instead of empty vector");
+            } else if command_to_check.clone().children.is_some() {
+                for child in command_to_check.children.clone().unwrap() {
+                    command_name = format!("{}.{}", command_name.clone(), child.name.clone());
+                    command_matcher.insert(command_name.clone(), child.clone());
+                    command_to_check = child;
+                }
+            } else {
+                break;
+            }
+        }
     }
-    args.to_owned()
+
+    command_matcher.get(&commands.join(".")).cloned()
 }
 
 fn get_value_flag(flag: String) -> (String, String) {
@@ -66,9 +76,7 @@ fn parse_flags(raw_flags: &[String]) -> Vec<(String, String)> {
         .collect()
 }
 
-pub(crate) fn prepare_vargs(args_with_ex: &[String]) -> Args {
-    let args = remove_ex(&mut args_with_ex.to_owned());
-
+pub(crate) fn transform_vargs(args: &[String]) -> Args {
     let mut commands_to_parse = vec![];
     let mut only_flags_raw: Vec<String> = vec![];
 
@@ -86,34 +94,4 @@ pub(crate) fn prepare_vargs(args_with_ex: &[String]) -> Args {
         commands: commands_to_parse,
         flags: parsed_flags,
     }
-}
-
-pub(crate) fn match_command(
-    registered_commands: &[Command],
-    commands: &[String],
-) -> Option<Command> {
-    let mut command_matcher = HashMap::new();
-    for command in registered_commands.iter() {
-        let mut command_name = command.name.clone().to_string();
-        command_matcher.insert(command_name.clone(), command.clone());
-        let mut command_to_check = command.clone();
-
-        loop {
-            if command_to_check.clone().children.is_some()
-                && command_to_check.clone().children.unwrap().is_empty()
-            {
-                panic!("Use None instead of empty vector");
-            } else if command_to_check.clone().children.is_some() {
-                for child in command_to_check.children.clone().unwrap() {
-                    command_name = format!("{}.{}", command_name.clone(), child.name.clone());
-                    command_matcher.insert(command_name.clone(), child.clone());
-                    command_to_check = child;
-                }
-            } else {
-                break;
-            }
-        }
-    }
-
-    command_matcher.get(&commands.join(".")).cloned()
 }

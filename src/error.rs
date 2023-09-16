@@ -1,21 +1,11 @@
-use std::error::Error as StdError;
-use std::fmt::Display;
+use thiserror::Error as ThisError;
 
-#[derive(Debug)]
+#[derive(Debug, ThisError, Clone)]
 pub enum Error {
+    #[error("Invalid format: {0}")]
     InvalidFormat(String),
+    #[error("The meta function is required for clier in runnable mode.")]
     NoMeta,
-    NoCommandAndNoHooks,
+    #[error("Command not found: {0}")]
+    CommandNotFound(String),
 }
-
-impl Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Error::InvalidFormat(msg) => write!(f, "InvalidFormat: {}", msg),
-            Error::NoMeta => write!(f, "NoMeta"),
-            Error::NoCommandAndNoHooks => write!(f, "NoCommandAndNoHooks"),
-        }
-    }
-}
-
-impl StdError for Error {}
