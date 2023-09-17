@@ -15,6 +15,7 @@ pub type Handler = fn(args: CmdArgs) -> i32;
 /// ## Non-complete example:
 /// ```rust
 /// use clier::command::Command;
+/// use clier::hooks::Flag;
 ///
 /// let command = Command::new(
 /// /* command name: */ "command",
@@ -27,24 +28,39 @@ pub type Handler = fn(args: CmdArgs) -> i32;
 /// .flags(vec![
 ///   Flag::new("flag-name", "flag description".to_string() /* <-- In help */)
 ///   .short('t')
-/// ])
+/// ]);
 /// ```
 /// Alot of these properties/builder methods are no necesserialy required, but are usefull for the user in the help output.
 /// ## Subcommand
 /// It is also possible to add subcommands to a command:
 /// ```rust
 /// use clier::command::Command;
+/// use clier::hooks::Flag;
+///
+/// let command = Command::new(
+/// /* command name: */ "command",
+/// /* description: */ "description",
+/// /* handler: */ |_args| {
+///   /* Your logic */
+///   0 // <-- i32: Exit Code of program, success = 0
+/// })
+/// .usage("command [usage text]")
+/// .flags(vec![
+///   Flag::new("flag-name", "flag description".to_string() /* <-- In help */)
+///   .short('t')
+/// ]);
 ///
 /// command.subcommand(
 ///   "subcommand",
 ///   "description",
+///   Some("usage"),
 ///   |_args| {
 ///    /* Your logic */
 ///    0 // <-- i32: Exit Code of program, success = 0
-/// })
+/// });
 /// ```
 ///
-/// It has the same methods and builder methods as a [Command][crate::command::Command]
+/// It has almost the same methods and builder methods as a [Command][crate::command::Command]
 
 #[derive(Debug, Clone)]
 pub struct Command {
