@@ -13,7 +13,7 @@ pub fn format_validate_reg_flags(
     };
 
   let mut taken_items: HashMap<String, bool> = HashMap::new();
-  let mut errors = vec![];
+  let mut error = String::new();
   flags.into_iter().for_each(|flag| {
     for (flag_key, flag_value) in argv_flags.iter() {
       let is_name_matching = flag.name == flag_key.clone().into();
@@ -40,14 +40,11 @@ pub fn format_validate_reg_flags(
     }
     let result = taken_items.get(flag.name.as_ref());
     if result.is_none() {
-      errors.push(Error::InvalidFormat(format!("Flag {:?} not provided", flag.name)))
+      error = flag.name.into()
     };
   });
-  match errors.len() {
+  match error.len() {
     0 => CResult::Ok(flags_ret),
-    _ => {
-      let error = errors.get(0).unwrap();
-      CResult::Err(error.clone())
-    }
+    _ => CResult::Err(Error::MissingFlag(error)),
   }
 }

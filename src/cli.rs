@@ -4,7 +4,7 @@ use std::env::args;
 use std::process::Termination;
 
 #[derive(Debug, Clone, Default)]
-pub struct Args {
+pub struct Argv {
   pub commands: Vec<String>,
   pub flags: Vec<(String, String)>,
 }
@@ -17,18 +17,18 @@ pub struct CliMeta {
   pub version: String,
 }
 
-// region:    --- Meta States
+// region: Meta States
 #[derive(Debug, Default, Clone)]
 pub struct MissingMeta;
 #[derive(Debug, Default, Clone)]
-pub struct Meta(pub(crate) CliMeta);
-// endregion: --- Meta States
+pub struct AlreadyHasMeta(pub(crate) CliMeta);
+// endregion: Meta States
 
 #[derive(Debug, Clone, Default)]
 pub struct Clier<T> {
   pub(crate) options: T,
   pub(crate) registered_commands: Vec<Command>,
-  pub args: Args,
+  pub args: Argv,
 }
 
 #[derive(Debug, Clone)]

@@ -18,6 +18,7 @@ impl TryInto<bool> for FlagData {
     }
   }
 }
+
 impl TryInto<i32> for FlagData {
   type Error = FlagError;
   fn try_into(self) -> Result<i32, Self::Error> {
@@ -40,7 +41,7 @@ impl TryInto<String> for FlagData {
 
 impl FlagData {
   pub fn is_empty(self) -> bool {
-    self.value.is_some() && self.value.unwrap() == ""
+    self.value.is_some_and(|value| value.is_empty())
   }
 }
 
