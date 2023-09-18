@@ -1,37 +1,41 @@
-pub mod command;
+use std::{
+  fs::{read_dir, DirEntry, File},
+  io::BufReader,
+  path::Path,
+};
 
-use std::{env::current_dir, path::PathBuf};
+use serde::{Deserialize, Serialize};
+mod command;
+pub use command::*;
+mod project;
+pub use project::*;
 
-pub trait Generator {
-    fn generate() -> Result<(), ()>;
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Config {
+  pub command_dir: String,
+}
 
-    fn find_path() -> Result<PathBuf, ()> {
-        let path = current_dir().unwrap();
-        let mut item: Option<PathBuf> = None;
-        path.ancestors().for_each(|v| {
-            for dir in v.read_dir().into_iter() {
-                for file in dir.into_iter().flatten() {
-                    if file.file_name() == "clier.config.json" {
-                        item = Some(file.path());
-                    }
-                }
-            }
-        });
+pub fn get_config() -> Config {
+  let dir = read_dir(".").unwrap();
+  let mut config_file: Option<DirEntry> = None;
 
-        let mut right = false;
-
-        for i in
-            item.clone().into_iter().next().unwrap().parent().unwrap().read_dir().unwrap().flatten()
-        {
-            if i.file_name() == "Cargo.toml" {
-                right = true;
-            }
-        }
-
-        if right {
-            item.ok_or(())
-        } else {
-            Err(())
-        }
+  for i in dir {
+    if config_file.is_some() {
+      break;
     }
+    let i = i.unwrap();
+    if i.file_name() == "clier.config.json" {
+      config_file = Some(i);
+    }
+  }
+
+  let Some(file_config) = config_file else {
+      eprintln!("clier.config.json could not be found");
+      std::process::exit(1);
+    };
+
+  let file = File::open(Path::new(&file_config.path())).unwrap();
+  let reader = BufReader::new(file);
+
+  serde_json::from_reader(reader).unwrap()
 }

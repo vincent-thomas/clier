@@ -23,13 +23,13 @@
 //! soon...
 
 mod cli;
+
 pub use cli::*;
 pub mod command;
 pub mod error;
 pub mod help;
 pub mod hooks;
-mod prelude;
 pub mod run;
 
-mod format;
+mod prelude;
 mod utils;

@@ -1,12 +1,14 @@
 use crate::command::Command;
-use crate::format::transform_vargs;
+use crate::prelude::Flags;
+use crate::utils::transform_vargs;
 use std::env::args;
+use std::fmt::{Debug, Formatter};
 use std::process::Termination;
 
 #[derive(Debug, Clone, Default)]
 pub struct Argv {
   pub commands: Vec<String>,
-  pub flags: Vec<(String, String)>,
+  pub flags: Flags,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -24,7 +26,7 @@ pub struct MissingMeta;
 pub struct AlreadyHasMeta(pub(crate) CliMeta);
 // endregion: Meta States
 
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct Clier<T> {
   pub(crate) options: T,
   pub(crate) registered_commands: Vec<Command>,
@@ -37,6 +39,12 @@ pub struct ExitCode(pub i32);
 impl Termination for ExitCode {
   fn report(self) -> std::process::ExitCode {
     std::process::exit(self.0)
+  }
+}
+
+impl<T: Debug> Debug for Clier<T> {
+  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("Clier").field("args", &self.args).finish()
   }
 }
 

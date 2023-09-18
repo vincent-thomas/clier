@@ -1,8 +1,7 @@
 use crate::command::Command;
 use crate::hooks::Flag;
+use crate::utils::match_command;
 use crate::CliMeta;
-
-use super::format::match_command;
 
 fn help_renderer(
   root_command: Option<Vec<Command>>,
@@ -19,17 +18,19 @@ fn help_renderer(
   }
 
   if let Some(commands) = root_command.clone() {
-    let longest_c_name = commands.iter().map(|value| value.name.len()).max();
-    help_text.push("\nCommands:".to_string());
+    if !commands.is_empty() {
+      let longest_c_name = commands.iter().map(|value| value.name.len()).max();
+      help_text.push("\nCommands:".to_string());
 
-    commands.iter().for_each(|command| {
-      help_text.push(format!(
-        "  {:width$}  {}",
-        command.name,
-        command.description,
-        width = longest_c_name.unwrap()
-      ));
-    })
+      commands.iter().for_each(|command| {
+        help_text.push(format!(
+          "  {:width$}  {}",
+          command.name,
+          command.description,
+          width = longest_c_name.unwrap()
+        ));
+      })
+    }
   }
   if let Some(flags) = flags {
     help_text.push("\nFlags:".to_string());
@@ -45,7 +46,7 @@ fn help_renderer(
 
 pub fn help(commands: &[Command], args: &[String], options: CliMeta) {
   let prog_name = if std::env::consts::OS == "windows" {
-    format!("{}.exe", options.name)
+    format!("{}[.exe]", options.name)
   } else {
     options.name.to_string()
   };

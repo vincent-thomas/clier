@@ -4,22 +4,10 @@ Argv {
         "command",
         "subcommand",
     ],
-    flags: [
-        (
-            "test",
-            "value",
-        ),
-        (
-            "production",
-            "false",
-        ),
-        (
-            "help",
-            "true",
-        ),
-        (
-            "try-me",
-            "false",
-        ),
-    ],
+    flags: {
+        "test": "value",
+        "production": "false",
+        "help": "true",
+        "try-me": "false",
+    },
 }

@@ -9,7 +9,7 @@ pub(crate) fn match_command(
   for command in registered_commands.iter() {
     let mut command_name = command.name.clone().to_string();
     command_matcher.insert(command_name.clone(), command.clone());
-    let mut command_to_check = command.clone();
+    let mut command_to_check = command.to_owned();
 
     loop {
       if command_to_check.clone().children.is_some()
@@ -97,5 +97,11 @@ pub(crate) fn transform_vargs(args: &[String]) -> Argv {
 
   let parsed_flags = parse_flags(&only_flags_raw);
 
-  Argv { commands: commands_to_parse, flags: parsed_flags }
+  let mut flags = HashMap::new();
+
+  for (key, value) in parsed_flags {
+    flags.insert(key, value);
+  }
+
+  Argv { commands: commands_to_parse, flags }
 }

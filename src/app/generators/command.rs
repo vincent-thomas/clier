@@ -1,27 +1,39 @@
-use super::Generator;
-use serde::{Deserialize, Serialize};
-use std::io::prelude::*;
+use super::Config;
+use std::{fs::File, io::Write};
 
 pub struct CommandGenerator;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-struct Config {
-    command_dir: Box<str>,
-}
+impl CommandGenerator {
+  pub fn generate(
+    config: Config,
+    name: impl Into<String>,
+    description: impl Into<String>,
+  ) -> Result<(), std::io::Error> {
+    let name = name.into();
+    let description = description.into();
 
-impl Generator for CommandGenerator {
-    fn generate() -> Result<(), ()> {
-        let path = CommandGenerator::find_path().unwrap();
-        let mut config = String::from("");
-        let _ = std::fs::File::open(path)
-            .unwrap()
-            .read_to_string(&mut config)
-            .expect("Could not read file");
+    let file_path = format!("{}/{}.rs", &config.command_dir, name);
+    let mut file = File::create(file_path).unwrap();
+    let file_writing = file.write_all(
+      format!(
+        "use clier::command::{{CmdArgs, Command}};
 
-        let config: Config = serde_json::from_str(&config).unwrap();
-        let dir = config.clone().command_dir;
+const NAME: &'static str = \"{name}\";
+const DESCRIPTION: &'static str = \"{description}\";
 
-        println!("{dir}");
-        Ok(())
-    }
+pub fn {name}_command() -> Command {{
+  Command::new(NAME, DESCRIPTION, command)
+}}
+
+fn command(args: CmdArgs) -> i32 {{
+    println!(\"Hello World\");
+    0
+}}
+",
+      )
+      .as_bytes(),
+    );
+
+    file_writing
+  }
 }

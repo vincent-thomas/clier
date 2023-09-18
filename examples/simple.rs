@@ -13,7 +13,7 @@ fn main() -> ExitCode {
   };
   let clier = Clier::parse();
 
-  let exit_code = clier.meta(meta).add_command(test_command()).run();
+  let exit_code = clier.meta(&meta).add_command(test_command()).run();
   exit_code.unwrap()
 }
 

@@ -2,5 +2,4 @@ merge_imports = false
 use_small_heuristics = "Max"
 tab_spaces = 2
 trailing_comma = "Never"
-imports_granularity = "Crate"
-group_imports = "One"
+imports_granularity = "Module"

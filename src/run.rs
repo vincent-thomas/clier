@@ -4,7 +4,7 @@ use crate::help::help;
 use crate::prelude::CResult;
 use crate::{CliMeta, Clier, ExitCode};
 
-use super::format::match_command;
+use super::utils::match_command;
 use super::utils::{format_validate_reg_flags, global_flags};
 use super::{AlreadyHasMeta, MissingMeta};
 
@@ -12,19 +12,25 @@ pub trait Runnable {
   fn add_command(self, cmd: Command) -> Self;
   fn root(self, description: &str, handler: Handler) -> Self;
   fn commands(self, cmd: Vec<Command>) -> Self;
+  fn get_commands(&self) -> Vec<Command>;
   fn run(self) -> Result<ExitCode, Error>;
 }
 
 impl Clier<MissingMeta> {
-  pub fn meta(self, meta: CliMeta) -> Clier<AlreadyHasMeta> {
+  /// .
+  pub fn meta(self, meta: &CliMeta) -> Clier<AlreadyHasMeta> {
     Clier {
-      options: AlreadyHasMeta(meta),
+      options: AlreadyHasMeta(meta.clone()),
       args: self.args,
       registered_commands: self.registered_commands,
     }
   }
 }
+
 impl Runnable for Clier<AlreadyHasMeta> {
+  fn get_commands(&self) -> Vec<Command> {
+    self.registered_commands.clone()
+  }
   fn add_command(mut self, cmd: Command) -> Self {
     if cmd.name.contains('.') {
       panic!("{:?}", Error::InvalidFormat(String::from("'name' can't contain '.'",)));

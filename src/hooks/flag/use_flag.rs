@@ -1,8 +1,9 @@
 use super::FlagError;
+use crate::prelude::Flags;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct FlagData {
-  value: Option<String>,
+  pub value: Option<String>,
 }
 
 impl TryInto<bool> for FlagData {
@@ -45,34 +46,36 @@ impl FlagData {
   }
 }
 
-pub fn use_flag(name: &'static str, short: Option<char>, args: &[(String, String)]) -> FlagData {
-  let flag_keys = args.iter().map(|value| value.0.clone()).collect::<Vec<String>>();
-  let is_there_key = flag_keys.contains(&name.to_string());
-  let is_there_short =
-    if let Some(short_char) = short { flag_keys.contains(&short_char.to_string()) } else { false };
-  if !is_there_key && !is_there_short {
-    return FlagData { value: None };
+pub fn use_flag(name: &'static str, short: Option<char>, flags: &Flags) -> FlagData {
+  let contains_name = flags.contains_key(&name.to_string());
+  let contains_short =
+    if let Some(short) = short { flags.contains_key(&short.to_string()) } else { false };
+
+  match (contains_name, contains_short) {
+    (false, false) => FlagData { value: None },
+    (true, _) => {
+      let value: Option<&String> = flags.get(&name.to_string());
+      FlagData { value: value.cloned() }
+    }
+    (_, true) => {
+      let value: Option<&String> = flags.get(&short.unwrap().to_string());
+      FlagData { value: value.cloned() }
+    }
   }
+}
 
-  let mut index_name: Option<usize> = None;
+#[cfg(test)]
+mod tests {
+  use std::collections::HashMap;
 
-  flag_keys
-    .iter()
-    .filter(|item| {
-      item == &name
-        || if let Some(short_char) = short {
-          item.to_string() == short_char.to_string()
-        } else {
-          false
-        }
-    })
-    .enumerate()
-    .for_each(|(index, _)| {
-      if index_name.is_none() {
-        index_name = Some(index);
-      }
-    });
-  let selected_flag = args.get(index_name.unwrap()).unwrap().to_owned();
+  use super::*;
 
-  FlagData { value: Some(selected_flag.1) }
+  #[test]
+  fn test() {
+    let mut args: Flags = HashMap::new();
+
+    args.insert("name".to_string(), "test".to_string());
+    let flag = use_flag("name", Some('n'), &args);
+    assert_eq!(flag, FlagData { value: Some("test".to_string()) });
+  }
 }

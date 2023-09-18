@@ -1,9 +1,14 @@
 use std::collections::HashMap;
 
-use crate::{command::Command, error::Error, hooks::Flag, prelude::CResult};
+use crate::{
+  command::Command,
+  error::Error,
+  hooks::Flag,
+  prelude::{CResult, Flags},
+};
 
 pub fn format_validate_reg_flags(
-  argv_flags: &[(String, String)],
+  argv_flags: &Flags,
   command: &Command,
 ) -> CResult<Vec<(String, Flag)>> {
   let mut flags_ret: Vec<(String, Flag)> = Vec::new();
