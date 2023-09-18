@@ -14,7 +14,7 @@ pub fn generate_command() -> Command {
 
 fn command(args: CmdArgs) -> i32 {
   let flags = use_flags(&args);
-  let t = flags.get("type").unwrap().clone();
+  let t = flags.get("type").unwrap();
 
   if t.as_str() == "command" {
     let config = get_config();

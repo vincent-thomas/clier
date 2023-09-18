@@ -7,18 +7,17 @@ pub(crate) fn match_command(
 ) -> Option<Command> {
   let mut command_matcher = HashMap::new();
   for command in registered_commands.iter() {
-    let mut command_name = command.name.clone().to_string();
+    let mut command_name = command.name.to_string();
     command_matcher.insert(command_name.clone(), command.clone());
     let mut command_to_check = command.to_owned();
 
     loop {
-      if command_to_check.clone().children.is_some()
-        && command_to_check.clone().children.unwrap().is_empty()
-      {
+      let t = command_to_check.clone();
+      if t.children.is_some() && t.children.unwrap().is_empty() {
         panic!("Use None instead of empty vector");
       } else if command_to_check.clone().children.is_some() {
         for child in command_to_check.children.clone().unwrap() {
-          command_name = format!("{}.{}", command_name.clone(), child.name.clone());
+          command_name = format!("{}.{}", &command_name, child.name);
           command_matcher.insert(command_name.clone(), child.clone());
           command_to_check = child;
         }
@@ -89,9 +88,9 @@ pub(crate) fn transform_vargs(args: &[String]) -> Argv {
 
   args.iter().for_each(|value| {
     if value.starts_with('-') || value.starts_with("--") {
-      only_flags_raw.push(value.clone());
+      only_flags_raw.push(value.to_owned());
     } else {
-      commands_to_parse.push(value.clone())
+      commands_to_parse.push(value.to_owned())
     }
   });
 

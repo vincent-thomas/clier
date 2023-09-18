@@ -20,7 +20,7 @@ impl Clier<MissingMeta> {
   /// .
   pub fn meta(self, meta: &CliMeta) -> Clier<AlreadyHasMeta> {
     Clier {
-      options: AlreadyHasMeta(meta.clone()),
+      options: AlreadyHasMeta(meta.to_owned()),
       args: self.args,
       registered_commands: self.registered_commands,
     }
@@ -44,7 +44,7 @@ impl Runnable for Clier<AlreadyHasMeta> {
     let mut root_command = Command::new("root", description, handler);
 
     if let Some(usage) = options.usage {
-      root_command = root_command.clone().usage(usage.as_str());
+      root_command = root_command.usage(usage.as_str());
     }
     self.add_command(root_command)
   }

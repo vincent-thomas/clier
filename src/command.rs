@@ -104,7 +104,7 @@ impl Command {
     let mut new_command = Self::new(name, description, handler);
 
     if let Some(usage) = usage {
-      new_command = new_command.clone().usage(usage);
+      new_command = new_command.usage(usage);
     }
 
     self.children.as_mut().unwrap_or(&mut vec![]).push(new_command);
