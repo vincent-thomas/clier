@@ -53,7 +53,7 @@ impl Clier<MissingMeta> {
     Clier {
       options: MissingMeta,
       registered_commands: vec![],
-      args: transform_vargs(&args().collect::<Vec<String>>()[1..]),
+      args: transform_vargs(&args().collect::<Vec<String>>()[1..]).unwrap(),
     }
   }
 }

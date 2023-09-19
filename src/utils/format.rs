@@ -1,4 +1,4 @@
-use crate::{command::Command, Argv};
+use crate::{command::Command, error::Error, prelude::CResult, Argv};
 use std::collections::HashMap;
 
 pub(crate) fn match_command(
@@ -38,69 +38,128 @@ pub(crate) fn match_command(
   }
 }
 
-fn get_value_flag(flag: String) -> (String, String) {
-  let is_splittable: bool = flag.contains('=');
+fn is_short_flag(flag: impl Into<String>) -> bool {
+  let flag = flag.into();
 
-  if !is_splittable {
-    let is_false = flag.starts_with("no-");
-    let key = flag.replace("no-", "");
-
-    return match is_false {
-      true => (key, "false".to_string()),
-      false => (key, "true".to_string()),
-    };
-  }
-
-  let flag = flag.split('=').collect::<Vec<&str>>();
-
-  let flag_key = flag.first().unwrap().to_string();
-  let flag_value = flag.get(1).unwrap().to_string();
-
-  (flag_key, flag_value)
+  flag.starts_with('-') && flag[1..].len() == 1
 }
 
-fn parse_flags(raw_flags: &[String]) -> Vec<(String, String)> {
-  raw_flags
+fn is_long_flag(flag: impl Into<String>) -> bool {
+  let flag = flag.into();
+  flag.starts_with("--") && flag[2..].len() != 1
+}
+
+pub(crate) fn transform_vargs(args: &[String]) -> CResult<Argv> {
+  let mut parsed_flags: HashMap<String, String> = HashMap::new();
+  let mut error: Option<Error> = None;
+
+  args
     .iter()
-    .filter(|flag| {
-      let flag: Vec<&str> = flag.split('=').collect();
-      let key = flag.first().unwrap();
+    .filter(|value| value.starts_with('-') || value.starts_with("--"))
+    .enumerate()
+    .filter_map(|(index, flag)| {
+      let is_short = is_short_flag(flag);
+      let is_long = is_long_flag(flag);
+      let has_equal = flag.contains('=');
 
-      key.starts_with('-') && key[1..].len() == 1 || key.starts_with("--") && key[2..].len() != 1
-    })
-    .map(|v| -> String {
-      let flag: Vec<&str> = v.split('=').collect();
-      let key = *flag.first().unwrap();
-      let is_short = key.starts_with('-') && key[1..].len() == 1;
-      if is_short {
-        v[1..].to_string()
+      let flag = if is_short {
+        flag[1..].to_string()
+      } else if is_long {
+        flag[2..].to_string()
       } else {
-        v[2..].to_string()
-      }
+        return None;
+      };
+
+      let (key, value) = if has_equal {
+        let flag_vec = flag.split('=').collect::<Vec<&str>>();
+        let key = flag_vec.first().unwrap().to_string();
+        let value = flag_vec.get(1).unwrap().to_string();
+        if key.starts_with("no-") {
+          error =
+            Some(Error::InvalidFormat("'no' modifier cannot be used with equal sign".to_string()));
+        };
+
+        (key, value)
+      } else {
+        let key = flag.clone();
+        let default_flag = &"--tt".to_string();
+
+        let next_arg = args.get(index + 1).unwrap_or(default_flag);
+        let is_next_flag = is_short_flag(next_arg) || is_long_flag(next_arg);
+        println!("NEXT_FLAG={:?} KEY={:?}", is_next_flag, key);
+        let value = if is_next_flag {
+          if key.starts_with("no-") {
+            "false".to_string()
+          } else {
+            "true".to_string()
+          }
+        } else {
+          if key.starts_with("no-") {
+            "false".to_string()
+          } else {
+            next_arg.to_string()
+          }
+        };
+
+        if let Some(key_no_no) = key.strip_prefix("no-") {
+          (key_no_no.to_string(), value)
+        } else {
+          (key, value)
+        }
+      };
+
+      Some(format!("{}={}", key, value))
     })
-    .map(get_value_flag)
-    .collect()
+    .for_each(|value| {
+      let flag = value.split('=').collect::<Vec<&str>>();
+      let key = flag.first().unwrap();
+      let value = flag.get(1).unwrap();
+      parsed_flags.insert(key.to_string(), value.to_string());
+    });
+  let commands = args
+    .iter()
+    .enumerate()
+    .filter(|(index, command_may)| {
+      let index = (if *index == 0 { 1 } else { *index }) - 1;
+
+      let is_current_flag = is_short_flag(*command_may) || is_long_flag(*command_may);
+      if let Some(cmd_before) = args.get(index) {
+        let is_before_flag = is_short_flag(cmd_before) || is_long_flag(cmd_before);
+        if is_before_flag && !is_current_flag && cmd_before.starts_with("--no-") {
+          return true;
+        }
+        if (is_before_flag) && !is_current_flag && !cmd_before.contains('=') {
+          return false;
+        }
+      };
+      !is_current_flag
+    })
+    .map(|v| v.1.clone())
+    .collect::<Vec<String>>();
+
+  match error {
+    None => CResult::Ok(Argv { commands, flags: parsed_flags }),
+    Some(err) => CResult::Err(err),
+  }
 }
 
-pub(crate) fn transform_vargs(args: &[String]) -> Argv {
-  let mut commands_to_parse = vec![];
-  let mut only_flags_raw: Vec<String> = vec![];
+#[cfg(test)]
+mod tests {
+  use super::*;
 
-  args.iter().for_each(|value| {
-    if value.starts_with('-') || value.starts_with("--") {
-      only_flags_raw.push(value.to_owned());
-    } else {
-      commands_to_parse.push(value.to_owned())
-    }
-  });
+  #[test]
+  fn test_transform_vargs() {
+    let result = transform_vargs(&[
+      "command".to_string(),
+      "--test=value".to_string(),
+      "--no-value".to_string(),
+    ])
+    .unwrap();
+    let mut hash = HashMap::new();
+    hash.insert("test".to_string(), "value".to_string());
+    hash.insert("value".to_string(), "false".to_string());
 
-  let parsed_flags = parse_flags(&only_flags_raw);
-
-  let mut flags = HashMap::new();
-
-  for (key, value) in parsed_flags {
-    flags.insert(key, value);
+    assert_eq!(*result.commands, vec!["command".to_string()]);
+    assert_eq!(result.flags, hash);
   }
-
-  Argv { commands: commands_to_parse, flags }
 }
