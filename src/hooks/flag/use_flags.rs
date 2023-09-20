@@ -1,4 +1,3 @@
-use super::Transformer;
 use crate::command::CmdArgs;
 use std::collections::HashMap;
 
@@ -17,13 +16,6 @@ impl Flag {
 
   pub fn short(mut self, short: char) -> Self {
     self.short = Some(short);
-    self
-  }
-}
-
-impl Transformer for HashMap<String, Flag> {
-  fn transform(self) -> Self {
-    println!("{:?}", self);
     self
   }
 }

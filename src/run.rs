@@ -2,8 +2,9 @@ use crate::command::{CmdArgs, Command, Handler};
 use crate::error::Error;
 use crate::format::{command, flags};
 use crate::help::help;
-use crate::prelude::Result;
+use crate::prelude::*;
 use crate::{CliMeta, Clier, ExitCode};
+use console::Term;
 
 use super::{AlreadyHasMeta, MissingMeta};
 
@@ -30,10 +31,10 @@ impl Clier<MissingMeta> {
 fn global_flags(argv: &Argv, registered_commands: &[Command], meta: CliMeta) -> bool {
   let is_version = use_flag("version", Some('v'), &argv.flags).try_into().unwrap_or(false);
   let is_help = use_flag("help", Some('h'), &argv.flags).try_into().unwrap_or(false);
-
   match (is_version, is_help) {
     (true, _) => {
-      println!("v{}", meta.version);
+      let term = Term::stdout();
+      let _ = term.write_line(&f!("v{}", meta.version));
       is_version
     }
     (_, true) => {
