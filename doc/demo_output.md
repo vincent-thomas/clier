@@ -1,4 +1,4 @@
-$ demo command subcommand --test=value --no-production --help --try-me=false
+$ cargo run -- command subcommand --test=value --no-production --help --try-me=false
 Argv {
     commands: [
         "command",

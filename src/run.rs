@@ -1,11 +1,10 @@
 use crate::command::{CmdArgs, Command, Handler};
 use crate::error::Error;
+use crate::format::{command, flags};
 use crate::help::help;
-use crate::prelude::CResult;
+use crate::prelude::Result;
 use crate::{CliMeta, Clier, ExitCode};
 
-use super::utils::match_command;
-use super::utils::{format_validate_reg_flags, global_flags};
 use super::{AlreadyHasMeta, MissingMeta};
 
 pub trait Runnable {
@@ -13,17 +12,35 @@ pub trait Runnable {
   fn root(self, description: &str, handler: Handler) -> Self;
   fn commands(self, cmd: Vec<Command>) -> Self;
   fn get_commands(&self) -> Vec<Command>;
-  fn run(self) -> Result<ExitCode, Error>;
+  fn run(self) -> Result<ExitCode>;
 }
 
+use crate::{help, hooks::use_flag, Argv};
+
 impl Clier<MissingMeta> {
-  /// .
   pub fn meta(self, meta: &CliMeta) -> Clier<AlreadyHasMeta> {
     Clier {
       options: AlreadyHasMeta(meta.to_owned()),
       args: self.args,
       registered_commands: self.registered_commands,
     }
+  }
+}
+
+fn global_flags(argv: &Argv, registered_commands: &[Command], meta: CliMeta) -> bool {
+  let is_version = use_flag("version", Some('v'), &argv.flags).try_into().unwrap_or(false);
+  let is_help = use_flag("help", Some('h'), &argv.flags).try_into().unwrap_or(false);
+
+  match (is_version, is_help) {
+    (true, _) => {
+      println!("v{}", meta.version);
+      is_version
+    }
+    (_, true) => {
+      help::help(registered_commands, &argv.commands, meta);
+      is_help
+    }
+    (_, _) => false,
   }
 }
 
@@ -54,20 +71,20 @@ impl Runnable for Clier<AlreadyHasMeta> {
     self
   }
 
-  fn run(self) -> CResult<ExitCode> {
+  fn run(self) -> Result<ExitCode> {
     if global_flags(&self.args, &self.registered_commands, self.clone().options.0) {
-      return CResult::Ok(ExitCode(0));
+      return Result::Ok(ExitCode(0));
     }
 
-    let Some(command) = match_command(&self.registered_commands, &self.args.commands) else {
+    let Some(command) = command::matcher(&self.registered_commands, &self.args.commands) else {
       return Err(Error::CommandNotFound(self.args.commands.join(" ")));
     };
 
-    let registered_flags = match format_validate_reg_flags(&self.args.flags, &command) {
-      CResult::Ok(value) => value,
-      CResult::Err(value) => {
+    let registered_flags = match flags::format_registered(&self.args.flags, &command) {
+      Result::Ok(value) => value,
+      Result::Err(value) => {
         help(&self.registered_commands, &self.args.commands, self.options.0);
-        return CResult::Err(value);
+        return Result::Err(value);
       }
     };
 

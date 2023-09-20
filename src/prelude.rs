@@ -1,7 +1,8 @@
+pub use crate::error::Error;
 use std::collections::HashMap;
 
-use crate::error::Error;
-
-pub(crate) type CResult<T> = Result<T, Error>;
+pub(crate) type Result<T> = core::result::Result<T, Error>;
 
 pub(crate) type Flags = HashMap<String, String>;
+
+pub use std::format as f;

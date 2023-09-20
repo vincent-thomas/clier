@@ -1,7 +1,9 @@
-use crate::command::Command;
 use crate::hooks::Flag;
-use crate::utils::match_command;
 use crate::CliMeta;
+use crate::{command::Command, format::command};
+use console::{style, Term};
+
+use crate::prelude::*;
 
 fn help_renderer(
   root_command: Option<Vec<Command>>,
@@ -11,19 +13,22 @@ fn help_renderer(
   description: String,
   flags: Option<Vec<Flag>>,
 ) {
-  let mut help_text = vec![format!("{} v{}\n{}", name, version, description)];
+  let render = Term::stdout();
+
+  render.write_line(&f!("{} v{}", name, version)).unwrap();
+  render.write_line(&description).unwrap();
 
   if let Some(usage) = usage {
-    help_text.push(format!("\nUsage:\n  {} {}", name, usage));
+    let _ = render.write_line(&f!("\n{}:\n  {name} {usage}", style("Usage").underlined()));
   }
 
   if let Some(commands) = root_command.clone() {
     if !commands.is_empty() {
       let longest_c_name = commands.iter().map(|value| value.name.len()).max();
-      help_text.push("\nCommands:".to_string());
+      let _ = render.write_line(&style("\nCommands:").underlined().to_string());
 
       commands.iter().for_each(|command| {
-        help_text.push(format!(
+        let _ = render.write_line(&f!(
           "  {:width$}  {}",
           command.name,
           command.description,
@@ -33,25 +38,24 @@ fn help_renderer(
     }
   }
   if let Some(flags) = flags {
-    help_text.push("\nFlags:".to_string());
+    let _ = render.write_line(&style("\nFlags:").underlined().to_string());
     flags
       .into_iter()
-      .for_each(|flag| help_text.push(format!("  {}: {}", flag.name, flag.description)));
+      .for_each(|flag| render.write_line(&f!("  {}: {}", flag.name, flag.description)).unwrap());
   }
-  help_text.push("\nGlobal Flags:".to_string());
-  help_text.push("  --help, -h     Shows this".to_string());
-  help_text.push("  --version, -v  Shows version".to_string());
-  println!("{}", help_text.join("\n"));
+  let _ = render.write_line(&style("\nGlobal Flags:").underlined().to_string());
+  let _ = render.write_line("  --help, -h     Shows this");
+  let _ = render.write_line("  --version, -v  Shows version");
 }
 
 pub fn help(commands: &[Command], args: &[String], options: CliMeta) {
   let prog_name = if std::env::consts::OS == "windows" {
-    format!("{}[.exe]", options.name)
+    f!("{}[.exe]", options.name)
   } else {
     options.name.to_string()
   };
 
-  let matcher = match_command(commands, args);
+  let matcher = command::matcher(commands, args);
 
   if let Some(child_command) = matcher {
     help_renderer(

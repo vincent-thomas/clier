@@ -9,7 +9,7 @@ fn main() -> ExitCode {
     name: "clier-example-simple".to_string(),
     description: "This is the description".to_string(),
     version: "1.0.0".to_string(),
-    usage: None,
+    usage: Some("test".to_string()),
   };
   let clier = Clier::parse();
 

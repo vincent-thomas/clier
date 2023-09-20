@@ -4,17 +4,14 @@ use crate::{
   command::Command,
   error::Error,
   hooks::Flag,
-  prelude::{CResult, Flags},
+  prelude::{Flags, Result},
 };
 
-pub fn format_validate_reg_flags(
-  argv_flags: &Flags,
-  command: &Command,
-) -> CResult<Vec<(String, Flag)>> {
+pub fn format_registered(argv_flags: &Flags, command: &Command) -> Result<Vec<(String, Flag)>> {
   let mut flags_ret: Vec<(String, Flag)> = Vec::new();
 
   let Some(flags) = command.clone().flags else {
-      return CResult::Ok(vec![])
+      return Result::Ok(vec![])
     };
 
   let mut taken_items: HashMap<String, bool> = HashMap::new();
@@ -49,7 +46,7 @@ pub fn format_validate_reg_flags(
     };
   });
   match error.len() {
-    0 => CResult::Ok(flags_ret),
-    _ => CResult::Err(Error::MissingFlag(error)),
+    0 => Result::Ok(flags_ret),
+    _ => Result::Err(Error::MissingFlag(error)),
   }
 }

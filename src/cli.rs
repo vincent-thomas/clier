@@ -1,6 +1,6 @@
 use crate::command::Command;
-use crate::prelude::Flags;
-use crate::utils::transform_vargs;
+use crate::format::vargs;
+use crate::prelude::*;
 use std::env::args;
 use std::fmt::{Debug, Formatter};
 use std::process::Termination;
@@ -53,7 +53,15 @@ impl Clier<MissingMeta> {
     Clier {
       options: MissingMeta,
       registered_commands: vec![],
-      args: transform_vargs(&args().collect::<Vec<String>>()[1..]).unwrap(),
+      args: vargs::transform(&args().collect::<Vec<String>>()[1..]).unwrap(),
+    }
+  }
+
+  pub fn parse_with_vargs(args: &[String]) -> Clier<MissingMeta> {
+    Clier {
+      options: MissingMeta,
+      registered_commands: vec![],
+      args: vargs::transform(args).unwrap(),
     }
   }
 }

@@ -4,8 +4,8 @@ use thiserror::Error as ThisError;
 pub enum Error {
   #[error("Invalid format: {0}")]
   InvalidFormat(String),
-  #[error("The meta function is required for clier in runnable mode.")]
-  NoMeta,
+  #[error("Duplicate of flags: {0}")]
+  ToManyFlags(String),
   #[error("Command not found: {0}")]
   CommandNotFound(String),
   #[error("Missing flag: {0}")]

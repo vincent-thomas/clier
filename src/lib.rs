@@ -31,5 +31,5 @@ pub mod help;
 pub mod hooks;
 pub mod run;
 
+mod format;
 mod prelude;
-mod utils;
