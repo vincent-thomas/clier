@@ -1,17 +1,17 @@
 use super::{AlreadyHasMeta, MissingMeta};
+use crate::builder::{CmdArgs, Command, Handler};
 use crate::error::Error;
 use crate::format::{command, flags};
 use crate::help::help;
 use crate::hooks::use_flag;
+use crate::parser::Argv;
 use crate::prelude::*;
 use crate::{CliMeta, Clier, ExitCode};
 
-use crate::builder::{CmdArgs, Command, Handler};
-use clier_parser::Argv;
 use console::Term;
 
 pub trait Runnable {
-  fn add_command(self, cmd: Command) -> Self;
+  fn command(self, cmd: Command) -> Self;
   fn root(self, description: &str, handler: Handler) -> Self;
   fn commands(self, cmd: Vec<Command>) -> Self;
   fn get_commands(&self) -> Vec<Command>;
@@ -49,7 +49,7 @@ impl Runnable for Clier<AlreadyHasMeta> {
   fn get_commands(&self) -> Vec<Command> {
     self.registered_commands.clone()
   }
-  fn add_command(mut self, cmd: Command) -> Self {
+  fn command(mut self, cmd: Command) -> Self {
     if cmd.name.contains('.') {
       panic!("{:?}", Error::InvalidFormat(String::from("'name' can't contain '.'",)));
     }
@@ -64,7 +64,7 @@ impl Runnable for Clier<AlreadyHasMeta> {
     if let Some(usage) = options.usage {
       root_command = root_command.usage(usage.as_str());
     }
-    self.add_command(root_command)
+    self.command(root_command)
   }
 
   fn commands(mut self, cmd: Vec<Command>) -> Self {

@@ -1,4 +1,4 @@
-use clier_parser::Argv;
+use crate::parser::Argv;
 
 mod flags;
 
@@ -28,10 +28,7 @@ pub type Handler = fn(args: CmdArgs) -> i32;
 ///   0 // <-- i32: Exit Code of program, success = 0
 /// })
 /// .usage("command [usage text]")
-/// .flags(vec![
-///   Flag::new("flag-name", "flag description".to_string() /* <-- In help */)
-///   .short('t')
-/// ]);
+/// .flag("flag-name", Some('f'), "flag description" /* <-- In help */);
 /// ```
 /// Alot of these properties/builder methods are no necesserialy required, but are usefull for the user in the help output.
 /// ## Subcommand
@@ -47,10 +44,7 @@ pub type Handler = fn(args: CmdArgs) -> i32;
 ///   0 // <-- i32: Exit Code of program, success = 0
 /// })
 /// .usage("command [usage text]")
-/// .flags(vec![
-///   Flag::new("flag-name", "flag description".to_string() /* <-- In help */)
-///   .short('t')
-/// ]);
+/// .flag("flag-name", Some('t'), "flag description" /* <-- In help */);
 ///
 /// command.subcommand(
 ///   "subcommand",
@@ -91,7 +85,17 @@ impl Command {
     self
   }
 
-  pub fn flags(mut self, flags: Vec<flags::Flag>) -> Self {
+  pub fn flag(mut self, name: &str, short: Option<char>, description: &str) -> Self {
+    let mut flags = self.flags.unwrap_or(vec![]);
+
+    let mut flag = Flag::new(name, description.to_string());
+
+    if let Some(short) = short {
+      flag = flag.short(short);
+    }
+
+    flags.push(flag);
+
     self.flags = Some(flags);
     self
   }

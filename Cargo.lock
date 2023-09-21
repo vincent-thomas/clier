@@ -219,32 +219,14 @@ checksum = "cd7cc57abe963c6d3b9d8be5b06ba7c8957a930305ca90304f24ef040aa6f961"
 
 [[package]]
 name = "clier"
-version = "0.4.2"
+version = "0.4.3"
 dependencies = [
  "cargo-rdme",
- "clier_builder",
- "clier_parser",
  "console",
  "criterion",
- "error",
  "serde",
  "serde_json",
  "thiserror",
-]
-
-[[package]]
-name = "clier_builder"
-version = "0.1.0"
-dependencies = [
- "clier",
- "clier_parser",
-]
-
-[[package]]
-name = "clier_parser"
-version = "0.1.0"
-dependencies = [
- "error",
 ]
 
 [[package]]
@@ -372,13 +354,6 @@ checksum = "aa68f1b12764fab894d2755d2518754e71b4fd80ecfb822714a1206c2aab39bf"
 dependencies = [
  "cc",
  "libc",
-]
-
-[[package]]
-name = "error"
-version = "0.1.0"
-dependencies = [
- "thiserror",
 ]
 
 [[package]]

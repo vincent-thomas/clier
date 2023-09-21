@@ -2,10 +2,10 @@ mod app;
 
 use app::commands::generate::generate_command;
 use app::commands::new::new_command;
+use clier::builder;
 use clier::help::help;
 use clier::run::Runnable;
 use clier::{CliMeta, Clier, ExitCode};
-use clier_builder as builder;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const NAME: &str = env!("CARGO_PKG_NAME");
@@ -19,7 +19,7 @@ fn main() -> clier::ExitCode {
     usage: None,
   };
 
-  let cli = Clier::parse().meta(&meta).add_command(generate_command()).add_command(new_command());
+  let cli = Clier::parse().meta(&meta).command(generate_command()).command(new_command());
   match cli.clone().run() {
     Ok(value) => value,
     Err(value) => match value {

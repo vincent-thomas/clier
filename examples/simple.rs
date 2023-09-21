@@ -1,7 +1,7 @@
 use clier::run::Runnable;
 use clier::{CliMeta, Clier, ExitCode};
 
-use clier::builder::{Command, Flag};
+use clier::builder::Command;
 use clier::hooks::use_flags;
 
 fn main() -> ExitCode {
@@ -13,7 +13,7 @@ fn main() -> ExitCode {
   };
   let clier = Clier::parse();
 
-  let exit_code = clier.meta(&meta).add_command(test_command()).run();
+  let exit_code = clier.meta(&meta).command(test_command()).run();
   exit_code.unwrap()
 }
 
@@ -24,5 +24,5 @@ fn test_command() -> Command {
     0
   })
   .usage("test")
-  .flags(vec![Flag::new("tes", "testing".to_string()).short('t')])
+  .flag("tes", None, "testing")
 }

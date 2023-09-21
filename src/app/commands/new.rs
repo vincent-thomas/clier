@@ -1,16 +1,17 @@
 use clier::hooks::use_flags;
 
 use crate::app::generators::ProjectGenerator;
-use crate::builder::{CmdArgs, Command, Flag};
+use crate::builder::{CmdArgs, Command};
 
 const NAME: &str = "new";
 const DESCRIPTION: &str = "todo...";
 
 pub fn new_command() -> Command {
-  Command::new(NAME, DESCRIPTION, command).flags(vec![
-    Flag::new("name", "Name of the project".to_string()).short('n'),
-    Flag::new("desc", "Description".to_string()).short('d'),
-  ])
+  Command::new(NAME, DESCRIPTION, command).flag("name", Some('n'), "Name of the project").flag(
+    "desc",
+    Some('d'),
+    "Description",
+  )
 }
 
 fn command(args: CmdArgs) -> i32 {

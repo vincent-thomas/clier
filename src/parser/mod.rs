@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use error::Error;
+use crate::error::Error;
 
 pub(crate) type Flags = HashMap<String, String>;
 

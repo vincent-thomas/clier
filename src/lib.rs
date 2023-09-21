@@ -44,18 +44,17 @@
 //! ## Framework
 //! soon...
 
-pub use clier_builder as builder;
-pub use clier_parser::Argv;
-pub use error;
-
+pub mod builder;
+pub mod error;
 pub mod help;
 pub mod hooks;
 pub mod run;
 
 mod format;
+mod parser;
 mod prelude;
+pub use parser::Argv;
 
-use clier_parser as parser;
 use std::env::args;
 use std::fmt::{Debug, Formatter};
 use std::process::Termination;
