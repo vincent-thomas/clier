@@ -21,6 +21,6 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
     - name: publish
-      run: cargo publish --token ${{ secrets.CARGO_TOKEN}}
+      run: cargo publish --token ${{ secrets.CARGO_TOKEN}} -p clier
       env:
         CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
