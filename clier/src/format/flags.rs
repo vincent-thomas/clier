@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
+use crate::builder::{Command, Flag};
+
 use crate::{
-  command::Command,
   error::Error,
-  hooks::Flag,
   prelude::{Flags, Result},
 };
 
@@ -18,7 +18,7 @@ pub fn format_registered(argv_flags: &Flags, command: &Command) -> Result<Vec<(S
   let mut error = String::new();
   flags.into_iter().for_each(|flag| {
     for (flag_key, flag_value) in argv_flags.iter() {
-      let is_name_matching = flag.name == flag_key.clone().into();
+      let is_name_matching = flag.name == flag_key.clone();
       let is_short_matching =
         flag.short.is_some_and(|flag_short| flag_short.to_string() == flag_key.clone());
 
@@ -32,7 +32,7 @@ pub fn format_registered(argv_flags: &Flags, command: &Command) -> Result<Vec<(S
         flags_ret.push((
           flag_key.clone(),
           Flag {
-            name: flag_key.clone().into(),
+            name: flag_key.clone(),
             description: flag.description.clone(),
             short: flag.short,
             value: Some(flag_value.clone()),
@@ -40,9 +40,9 @@ pub fn format_registered(argv_flags: &Flags, command: &Command) -> Result<Vec<(S
         ));
       }
     }
-    let result = taken_items.get(flag.name.as_ref());
-    if result.is_none() {
-      error = flag.name.into()
+    let is_item_taken = taken_items.get(&flag.name);
+    if is_item_taken.is_none() {
+      error = flag.name
     };
   });
   match error.len() {

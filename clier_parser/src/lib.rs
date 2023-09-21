@@ -1,7 +1,14 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::prelude::*;
-use crate::Argv;
+use error::Error;
+
+pub(crate) type Flags = HashMap<String, String>;
+
+#[derive(Debug, Clone, Default)]
+pub struct Argv {
+  pub commands: Vec<String>,
+  pub flags: Flags,
+}
 
 fn is_short_flag(flag: impl Into<String>) -> bool {
   let flag = flag.into();
@@ -19,7 +26,8 @@ fn strip_dash(is_long: bool, flag: impl Into<String>) -> Option<String> {
   flag.strip_prefix(if is_long { "--" } else { "-" }).map(|v| v.to_string())
 }
 
-pub(crate) fn transform(args: &[String]) -> Result<Argv> {
+#[doc(hidden)]
+pub fn transform(args: &[String]) -> Result<Argv, Error> {
   let mut parsed_flags: HashMap<String, String> = HashMap::new();
   let mut error: Option<Error> = None;
 

@@ -1,6 +1,6 @@
-use crate::command::Command;
+use crate::builder::Command;
+use crate::builder::Flag;
 use crate::format::command;
-use crate::hooks::Flag;
 use crate::CliMeta;
 use console::{style, Term};
 

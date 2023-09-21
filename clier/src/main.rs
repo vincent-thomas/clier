@@ -5,6 +5,7 @@ use app::commands::new::new_command;
 use clier::help::help;
 use clier::run::Runnable;
 use clier::{CliMeta, Clier, ExitCode};
+use clier_builder as builder;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const NAME: &str = env!("CARGO_PKG_NAME");
@@ -24,7 +25,7 @@ fn main() -> clier::ExitCode {
     Err(value) => match value {
       clier::error::Error::CommandNotFound(command) => {
         if command.is_empty() {
-          help(&cli.get_commands(), &cli.args.commands, meta);
+          help(cli.get_commands().as_slice(), &cli.args.commands, meta);
         } else {
           println!("Command not found: {}", command);
         }

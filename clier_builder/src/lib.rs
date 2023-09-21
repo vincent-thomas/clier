@@ -1,4 +1,8 @@
-use crate::{hooks::Flag, Argv};
+use clier_parser::Argv;
+
+mod flags;
+
+pub use flags::*;
 
 /// The CmdArgs struct that is passed to all command handlers.
 #[derive(Debug, Clone)]
@@ -6,7 +10,7 @@ pub struct CmdArgs {
   /// struct 'Argv' contains parsed flags and commands.
   pub args: Argv,
   /// Registered flags for the command by the struct 'Command::flag'.
-  pub registered_flags: Vec<(String, Flag)>,
+  pub registered_flags: Vec<(String, flags::Flag)>,
 }
 
 pub type Handler = fn(args: CmdArgs) -> i32;
@@ -14,8 +18,7 @@ pub type Handler = fn(args: CmdArgs) -> i32;
 /// The Command struct to initialize a new command.
 /// ## Non-complete example:
 /// ```rust
-/// use clier::command::Command;
-/// use clier::hooks::Flag;
+/// use clier::builder::{Command, Flag};
 ///
 /// let command = Command::new(
 /// /* command name: */ "command",
@@ -34,8 +37,7 @@ pub type Handler = fn(args: CmdArgs) -> i32;
 /// ## Subcommand
 /// It is also possible to add subcommands to a command:
 /// ```rust
-/// use clier::command::Command;
-/// use clier::hooks::Flag;
+/// use clier::builder::{Flag, Command};
 ///
 /// let command = Command::new(
 /// /* command name: */ "command",
@@ -60,16 +62,16 @@ pub type Handler = fn(args: CmdArgs) -> i32;
 /// });
 /// ```
 ///
-/// It has almost the same methods and builder methods as a [Command][crate::command::Command]
+/// It has almost the same methods and builder methods as a [Command]
 
 #[derive(Debug, Clone)]
 pub struct Command {
-  pub(crate) name: String,
-  pub(crate) handler: Handler,
-  pub(crate) usage: Option<String>,
-  pub(crate) flags: Option<Vec<Flag>>,
-  pub(crate) description: String,
-  pub(crate) children: Option<Vec<Command>>,
+  pub name: String,
+  pub handler: Handler,
+  pub usage: Option<String>,
+  pub flags: Option<Vec<flags::Flag>>,
+  pub description: String,
+  pub children: Option<Vec<Command>>,
 }
 
 impl Command {
@@ -89,7 +91,7 @@ impl Command {
     self
   }
 
-  pub fn flags(mut self, flags: Vec<Flag>) -> Self {
+  pub fn flags(mut self, flags: Vec<flags::Flag>) -> Self {
     self.flags = Some(flags);
     self
   }

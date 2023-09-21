@@ -1,6 +1,7 @@
+use clier::Argv;
 use clier::Clier;
 
 fn main() {
-  let args = Clier::parse().args;
+  let args: Argv = Clier::parse().args;
   println!("{:#?}", args);
 }

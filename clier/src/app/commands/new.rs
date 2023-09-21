@@ -1,9 +1,7 @@
-use clier::{
-  command::{CmdArgs, Command},
-  hooks::{use_flags, Flag},
-};
+use clier::hooks::use_flags;
 
 use crate::app::generators::ProjectGenerator;
+use crate::builder::{CmdArgs, Command, Flag};
 
 const NAME: &str = "new";
 const DESCRIPTION: &str = "todo...";

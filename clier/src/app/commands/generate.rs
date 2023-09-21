@@ -1,8 +1,8 @@
 use std::fs;
 use std::io::ErrorKind;
 
-use clier::command::{CmdArgs, Command};
-use clier::hooks::{use_flag, use_flags, Flag};
+use crate::builder::{CmdArgs, Command, Flag};
+use clier::hooks::{use_flag, use_flags};
 
 use crate::app::generators::{get_config, CommandGenerator};
 
@@ -26,7 +26,7 @@ fn command(args: CmdArgs) -> i32 {
       }
     }
 
-    let command_name = match use_flag("name", Some('n'), &args.args.flags).value {
+    let command_name = match use_flag("name", Some('n'), &args.args.flags).0 {
       Some(value) => value,
       None => {
         eprintln!("flag name, is required");
@@ -34,7 +34,7 @@ fn command(args: CmdArgs) -> i32 {
       }
     };
     let description =
-      use_flag("desc", Some('d'), &args.args.flags).value.unwrap_or("todo...".to_string());
+      use_flag("desc", Some('d'), &args.args.flags).0.unwrap_or("todo...".to_string());
     let file_writing = CommandGenerator::generate(config.clone(), &command_name, description);
 
     match file_writing {

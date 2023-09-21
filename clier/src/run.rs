@@ -1,12 +1,14 @@
-use crate::command::{CmdArgs, Command, Handler};
+use super::{AlreadyHasMeta, MissingMeta};
 use crate::error::Error;
 use crate::format::{command, flags};
 use crate::help::help;
+use crate::hooks::use_flag;
 use crate::prelude::*;
 use crate::{CliMeta, Clier, ExitCode};
-use console::Term;
 
-use super::{AlreadyHasMeta, MissingMeta};
+use crate::builder::{CmdArgs, Command, Handler};
+use clier_parser::Argv;
+use console::Term;
 
 pub trait Runnable {
   fn add_command(self, cmd: Command) -> Self;
@@ -15,8 +17,6 @@ pub trait Runnable {
   fn get_commands(&self) -> Vec<Command>;
   fn run(self) -> Result<ExitCode>;
 }
-
-use crate::{help, hooks::use_flag, Argv};
 
 impl Clier<MissingMeta> {
   pub fn meta(self, meta: &CliMeta) -> Clier<AlreadyHasMeta> {
@@ -38,7 +38,7 @@ fn global_flags(argv: &Argv, registered_commands: &[Command], meta: CliMeta) -> 
       is_version
     }
     (_, true) => {
-      help::help(registered_commands, &argv.commands, meta);
+      help(registered_commands, &argv.commands, meta);
       is_help
     }
     (_, _) => false,

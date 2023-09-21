@@ -1,4 +1,4 @@
-use crate::command::Command;
+use crate::builder::Command;
 use std::collections::HashMap;
 
 pub(crate) fn matcher(registered_commands: &[Command], commands: &[String]) -> Option<Command> {

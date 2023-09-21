@@ -1,8 +1,8 @@
 use clier::run::Runnable;
 use clier::{CliMeta, Clier, ExitCode};
 
-use clier::command::Command;
-use clier::hooks::Flag;
+use clier::builder::{Command, Flag};
+use clier::hooks::use_flags;
 
 fn main() -> ExitCode {
   let meta = CliMeta {
@@ -19,7 +19,8 @@ fn main() -> ExitCode {
 
 fn test_command() -> Command {
   Command::new("test", "detta är hur man gör", |_args| {
-    println!("{:?}", _args);
+    let flags = use_flags(&_args);
+    println!("{:?}", flags);
     0
   })
   .usage("test")

@@ -1,0 +1,26 @@
+name: Pubish
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    name: Build and test
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
+    - name: publish
+      run: cargo publish --token ${{ secrets.CARGO_TOKEN}}
+      env:
+        CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
