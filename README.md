@@ -43,7 +43,6 @@ Argv {
 ```
 
 ### Framework
-soon...
 ```rust
 use clier::builder::{CmdArgs, RCommand};
 use clier::error;
