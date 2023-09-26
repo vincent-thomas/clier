@@ -4,8 +4,6 @@ use std::path::Path;
 
 pub struct ProjectGenerator;
 
-const PKG_VERSION: &str = env!("CARGO_PKG_VERSION");
-
 impl ProjectGenerator {
   pub fn generate(name: impl Into<String>, description: impl Into<String>) {
     let name = name.into();
@@ -28,8 +26,9 @@ edition = \"2021\"
 description = \"{description}\"
 
 [dependencies]
-clier = \"{PKG_VERSION}\"
+clier = \"{version}\"
 ",
+        version = env!("CARGO_PKG_VERSION"),
       )
       .as_bytes(),
     );

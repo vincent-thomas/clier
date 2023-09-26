@@ -1,23 +1,27 @@
 use std::fs;
 use std::io::ErrorKind;
 
-use crate::builder::{CmdArgs, Command};
+use crate::{
+  app::generators::Config,
+  builder::{CmdArgs, RCommand},
+};
 use clier::hooks::{use_flag, use_flags};
 
-use crate::app::generators::{get_config, CommandGenerator};
+use crate::app::generators::CommandGenerator;
 
-pub fn generate_command() -> Command {
-  Command::new("generate", "Generates parts of program", command)
+pub fn generate_command() -> RCommand {
+  RCommand::new("generate", "Generates parts of program", command)
     .usage("generate [--flags=value]")
     .flag("type", Some('t'), "type of thing to generate")
 }
 
 fn command(args: CmdArgs) -> i32 {
+  println!("{:?}", args);
   let flags = use_flags(&args);
   let t = flags.get("type").unwrap();
 
   if t.as_str() == "command" {
-    let config = get_config();
+    let config = Config::get();
 
     if let Err(err) = fs::create_dir(&config.command_dir) {
       if err.kind() != ErrorKind::AlreadyExists {

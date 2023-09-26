@@ -19,4 +19,4 @@ doc:
 	@cargo doc --no-deps
 
 watch-doc:
-	@cargo watch -x "doc --no-deps"
+	@RUSTDOCFLAGS="--cfg docsrs" cargo +nightly watch -x "doc --all-features"	

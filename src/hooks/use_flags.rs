@@ -2,8 +2,10 @@ use std::collections::HashMap;
 
 use crate::builder::CmdArgs;
 
+/// Use all registered commands
 pub fn use_flags(args: &CmdArgs) -> HashMap<String, String> {
   let mut flags = HashMap::new();
+
   args
     .clone()
     .registered_flags

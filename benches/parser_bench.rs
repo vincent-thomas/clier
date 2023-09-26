@@ -4,7 +4,7 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 fn sort_arr_benchmark(c: &mut Criterion) {
   c.bench_function("Only Parsing", |b| {
     b.iter(|| {
-      Clier::parse_with_vargs(black_box(&[
+      Clier::with_args(black_box(&[
         "command".to_string(),
         "--test=value".to_string(),
         "--name".to_string(),

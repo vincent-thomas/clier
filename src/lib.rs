@@ -1,3 +1,6 @@
+#![deny(missing_docs)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 //! # Command Line Argument Parser for Rust
 //! `Clier` is a command line argument parser and command framework for rust.
 //!
@@ -5,27 +8,18 @@
 //! To start a new cli projects run:
 //!
 //! ```console
-//! $ cargo new demo
+//! $ cargo new demo && cd demo
 //! $ cargo add clier
 //! ```
 //!
-//! Then define your CLI in `main.rs`:
+//! Then define your CLI in `src/main.rs`:
 //!
 //! ```rust
-
-//! use clier::Argv;
-//! use clier::Clier;
-//!
-//! fn main() {
-//!   let args: Argv = Clier::parse().args;
-//!   println!("{:#?}", args);
-//! }
-//!
+#![doc = include_str!("../examples/parser.rs")]
 //! ```
 //!
 //! And try it out:
 //! ```md
-//!
 //! $ cargo run -- command subcommand --test=value --no-production --help --try-me=false
 //! Argv {
 //!     commands: [
@@ -42,74 +36,74 @@
 //! ```
 //!
 //! ## Framework
-//! soon...
+//! To start a new cli app run:
+//!
+//! ```console
+//! $ cargo new demo-app && cd demo-app
+//! $ cargo add clier
+//! ```
+//!
+//! Then define your CLI in `src/main.rs`:
+//! ```rust
+#![doc = include_str!("../examples/framework.rs")]
+//! ```
 
+// region: Imports
+
+/// Structs for easliy building entities describing the commands and flags.
 pub mod builder;
+/// Error enum
 pub mod error;
-pub mod help;
+/// Hooks for runtime of app, inspired by react.
 pub mod hooks;
+/// Short hand for building commands and flags
+/// ## Check source for code
+#[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
+#[cfg(feature = "macros")]
+pub mod macros;
+/// Run
 pub mod run;
 
-mod format;
 mod parser;
 mod prelude;
+mod resolver;
 pub use parser::Argv;
 
+use run::Meta;
 use std::env::args;
-use std::fmt::{Debug, Formatter};
-use std::process::Termination;
 
-#[derive(Debug, Clone, Default)]
-pub struct CliMeta {
-  pub name: String,
-  pub description: String,
-  pub usage: Option<String>,
-  pub version: String,
-}
+// endregion: Imports
 
 // region: Meta States
+/// Typestate pattern: State for (CliMeta)
 #[derive(Debug, Default, Clone)]
 pub struct MissingMeta;
-#[derive(Debug, Default, Clone)]
-pub struct AlreadyHasMeta(pub(crate) CliMeta);
+/// Typestate pattern: State for (CliMeta)
+#[derive(Debug, Clone)]
+pub struct AlreadyHasMeta(pub(crate) Meta);
 // endregion: Meta States
 
-#[derive(Clone, Default)]
+/// Clier is the main struct for the framework
+#[derive(Clone, Default, Debug)]
 pub struct Clier<T> {
   pub(crate) options: T,
-  pub(crate) registered_commands: Vec<builder::Command>,
+  pub(crate) registered_commands: Vec<builder::RCommand>,
+  /// Parsed arguments from the command line
   pub args: Argv,
 }
 
-#[derive(Debug, Clone)]
-pub struct ExitCode(pub i32);
-
-impl Termination for ExitCode {
-  fn report(self) -> std::process::ExitCode {
-    std::process::exit(self.0)
-  }
-}
-
-impl<T: Debug> Debug for Clier<T> {
-  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("Clier").field("args", &self.args).finish()
-  }
-}
-
 impl Clier<MissingMeta> {
+  /// Create a new [Clier] instance and parsing
   pub fn parse() -> Clier<MissingMeta> {
     Clier {
       options: MissingMeta,
       registered_commands: vec![],
-      args: parser::transform(&args().collect::<Vec<String>>()[1..]).unwrap(),
+      args: Argv::from(&args().collect::<Vec<String>>()[1..]),
     }
   }
 
-  pub fn parse_with_vargs(args: &[String]) -> Clier<MissingMeta> {
-    Clier {
-      options: MissingMeta,
-      registered_commands: vec![],
-      args: parser::transform(args).unwrap(),
-    }
+  /// Creating a new [Clier] instance with custom arguments
+  pub fn with_args(args: &[String]) -> Clier<MissingMeta> {
+    Clier { options: MissingMeta, registered_commands: vec![], args: Argv::from(args) }
   }
 }

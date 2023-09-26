@@ -2,6 +2,7 @@ use super::FlagError;
 use crate::prelude::Flags;
 
 #[derive(Debug, Clone, PartialEq)]
+/// FlagData
 pub struct FlagData(pub Option<String>);
 
 impl TryInto<bool> for FlagData {
@@ -39,11 +40,12 @@ impl TryInto<String> for FlagData {
 }
 
 impl FlagData {
+  /// Check is the flag value is empty
   pub fn is_empty(self) -> bool {
     self.0.is_some_and(|value| value.is_empty())
   }
 }
-
+/// Using flag
 pub fn use_flag(name: &'static str, short: Option<char>, flags: &Flags) -> FlagData {
   let contains_name = flags.contains_key(&name.to_string());
   let contains_short =
@@ -72,13 +74,13 @@ mod tests {
 
   #[test]
   fn test() {
-    let mut args: Flags = HashMap::new();
+    let mut args = HashMap::new();
 
     args.insert("name".to_string(), "test".to_string());
     let flag = use_flag("name", Some('n'), &args);
     assert_eq!(flag, FlagData(Some("test".to_string())));
 
-    let mut args: Flags = HashMap::new();
+    let mut args = HashMap::new();
 
     args.insert("n".to_string(), "test".to_string());
     let flag = use_flag("name", Some('n'), &args);
