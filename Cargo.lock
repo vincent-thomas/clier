@@ -116,7 +116,7 @@ checksum = "cd7cc57abe963c6d3b9d8be5b06ba7c8957a930305ca90304f24ef040aa6f961"
 
 [[package]]
 name = "clier"
-version = "0.6.1"
+version = "0.6.2"
 dependencies = [
  "clier_parser",
  "console",
@@ -126,7 +126,7 @@ dependencies = [
 
 [[package]]
 name = "clier_cli"
-version = "0.6.1"
+version = "0.6.2"
 dependencies = [
  "clier",
  "serde",
@@ -135,7 +135,7 @@ dependencies = [
 
 [[package]]
 name = "clier_parser"
-version = "0.6.1"
+version = "0.6.2"
 
 [[package]]
 name = "console"
