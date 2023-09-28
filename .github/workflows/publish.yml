@@ -9,7 +9,7 @@ env:
 
 jobs:
   publish:
-    name: Build and test
+    name: Build and test and publish
     runs-on: ubuntu-latest
 
     steps:
@@ -19,14 +19,14 @@ jobs:
     - name: Run tests
       run: cargo test
     - name: Publish clier_parser
-      run: cargo publish --token ${{ secrets.CARGO_TOKEN}} -p clier_parser
+      run: cargo publish -p clier_parser
       env:
-        CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
+        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
     - name: Publish clier
-      run: cargo publish --token ${{ secrets.CARGO_TOKEN}} -p clier
+      run: cargo publish -p clier
       env:
-        CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
+        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
     - name: Publish clier_cli
-      run: cargo publish --token ${{ secrets.CARGO_TOKEN}} -p clier_cli
+      run: cargo publish -p clier_cli
       env:
-        CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
+        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
