@@ -3,6 +3,10 @@ name = "clier_cli"
 version = "0.6.2"
 edition = "2021"
 license = "MIT"
+description = "Cli for generating code for the clier framework"
+repository = "https://github.com/vincent-thomas/clier"
+keywords = ["cli", "framework", "parser"]
+documentation = "https://docs.rs/clier"
 
 [[bin]]
 name = "clier"
