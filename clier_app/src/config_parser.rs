@@ -5,7 +5,7 @@ use std::{
   path::Path,
 };
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
   pub command_dir: String,
 }

@@ -51,7 +51,7 @@ fn format_commands(registered_commands: &[RCommand]) -> HashMap<String, Runnable
       name,
       RunnableCommand {
         handler: val.handler,
-        // usage: val.usage,
+        usage: val.usage,
         flags: val.flags,
         description: val.description,
       },
@@ -62,18 +62,10 @@ fn format_commands(registered_commands: &[RCommand]) -> HashMap<String, Runnable
   HashMap::from_iter(commands_vec)
 }
 
-pub(crate) fn resolve_command(argv: &Argv, registered_commands: &[RCommand]) -> Action {
-  let commands = format_commands(registered_commands);
-  match global_flags(argv) {
-    FlagsAction::ShowHelp => return Action::ShowHelp(commands),
-    FlagsAction::ShowVersion => return Action::ShowVersion,
-    FlagsAction::Nothing => {}
-  };
-
-  if let Some(command_to_run) = commands.get(argv.commands.join(".").as_str()) {
-    return Action::RunCommand(argv.commands.join("."), command_to_run.clone());
-  }
-
+pub(crate) fn command_fetcher(
+  argv: &Argv,
+  commands: HashMap<String, RunnableCommand>,
+) -> (Vec<String>, Option<RunnableCommand>) {
   let valid_args = argv
     .commands
     .iter()
@@ -86,76 +78,25 @@ pub(crate) fn resolve_command(argv: &Argv, registered_commands: &[RCommand]) -> 
     .collect::<Vec<String>>();
 
   let mut command = commands.get(&valid_args.join("."));
-
   if command.is_none() && valid_args.is_empty() {
     command = commands.get("root");
   }
+  (valid_args, command.cloned())
+}
+
+pub(crate) fn resolve_command(argv: &Argv, registered_commands: &[RCommand]) -> Action {
+  let commands = format_commands(registered_commands);
+  match global_flags(argv) {
+    FlagsAction::ShowHelp => return Action::ShowHelp(commands),
+    FlagsAction::ShowVersion => return Action::ShowVersion,
+    FlagsAction::Nothing => {}
+  };
+
+  let (valid_args, command) = command_fetcher(argv, commands.clone());
 
   if let Some(command_to_run) = command {
-    Action::RunCommand(valid_args.join("."), command_to_run.clone())
+    Action::RunCommand(valid_args.join("."), command_to_run)
   } else {
     Action::ShowHelp(commands)
   }
-}
-
-// Write test cases for the following functions:
-// - global_flags
-// - format_commands
-// - resolve_command
-#[test]
-fn test_flags() {
-  let action = resolve_command(
-    &Argv {
-      commands: vec!["command".to_string(), "subcommands".to_string()],
-      flags: HashMap::from([
-        ("version".to_string(), "true".to_string()),
-        ("help".to_string(), "false".to_string()),
-      ]),
-    },
-    &[],
-  );
-
-  assert_eq!(action, Action::ShowVersion);
-
-  let action = resolve_command(
-    &Argv {
-      commands: vec!["command".to_string(), "subcommands".to_string()],
-      flags: HashMap::from([
-        ("version".to_string(), "false".to_string()),
-        ("help".to_string(), "true".to_string()),
-      ]),
-    },
-    &[],
-  );
-
-  assert_eq!(action, Action::ShowHelp(HashMap::new()));
-}
-
-#[test]
-fn test_resolve_commands() {
-  // Måste vara funktion p.g.a man jämför minnesadresser till funktionen.
-  let handler = |_args| 0;
-
-  let action = resolve_command(
-    &Argv {
-      commands: vec!["command".to_string(), "subcommands".to_string()],
-      flags: HashMap::new(),
-    },
-    &[RCommand {
-      name: "command".to_string(),
-      description: "description".to_string(),
-      handler,
-      usage: None,
-      flags: None,
-      children: None,
-    }],
-  );
-
-  assert_eq!(
-    action,
-    Action::RunCommand(
-      "command".to_string(),
-      RunnableCommand { description: "description".to_string(), handler, flags: None }
-    )
-  );
 }

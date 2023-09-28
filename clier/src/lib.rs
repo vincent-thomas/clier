@@ -64,9 +64,8 @@ pub mod macros;
 /// Run
 pub mod run;
 
-mod parser;
 mod prelude;
-pub use parser::Argv;
+pub use clier_parser::Argv;
 
 use run::Meta;
 use std::env::args;

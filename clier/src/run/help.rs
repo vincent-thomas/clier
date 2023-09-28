@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 
 use crate::builder::{RFlag, RunnableCommand};
-use crate::prelude::*;
 use crate::Meta;
+use crate::{prelude::*, Argv};
 use console::{style, Term};
+
+use super::resolver::command_fetcher;
 
 fn help_renderer(
   root_command: HashMap<String, &RunnableCommand>,
@@ -56,7 +58,7 @@ pub(crate) fn help(commands: &HashMap<String, RunnableCommand>, args: &[String],
     options.name.to_string()
   };
 
-  let matcher = commands.get(args.join(".").as_str());
+  // let matcher = commands.get(args.join(".").as_str());
   let children: Vec<(String, &RunnableCommand)> = if args.is_empty() {
     commands
       .iter()
@@ -77,7 +79,10 @@ pub(crate) fn help(commands: &HashMap<String, RunnableCommand>, args: &[String],
       })
       .collect()
   };
-  if commands.get(args.join(".").as_str()).is_none() {
+
+  let (args, main_command) = command_fetcher(&Argv::from(args), commands.clone());
+
+  if main_command.is_none() {
     if args.is_empty() {
       help_renderer(
         HashMap::from_iter(children),
@@ -90,12 +95,13 @@ pub(crate) fn help(commands: &HashMap<String, RunnableCommand>, args: &[String],
     }
     return;
   };
-  let flags = if let Some(m) = matcher { m.clone().flags.unwrap_or(vec![]) } else { vec![] };
+  let flags =
+    if let Some(ref m) = main_command { m.clone().flags.unwrap_or(vec![]) } else { vec![] };
 
   help_renderer(
     HashMap::from_iter(children),
     prog_name,
-    options.usage,
+    main_command.unwrap().usage,
     options.version,
     options.description,
     flags,

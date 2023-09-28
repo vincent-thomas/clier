@@ -17,8 +17,8 @@ pub struct CmdArgs {
 pub(crate) struct RunnableCommand {
   /// The function to run command.
   pub handler: Handler,
-  // / Usage of the command. Displayed in help.
-  // pub usage: Option<String>,
+  /// Usage of the command. Displayed in help.
+  pub usage: Option<String>,
   /// Registered Flags that are required for command to run. Passed down with [crate::hooks::use_flags] hook.
   pub flags: Option<Vec<RFlag>>,
   /// The description of the command.

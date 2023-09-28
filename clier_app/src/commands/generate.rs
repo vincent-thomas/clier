@@ -1,14 +1,12 @@
 use std::fs;
 use std::io::ErrorKind;
 
-use crate::{
-  app::config_parser::Config,
-  builder::{CmdArgs, RCommand},
-};
+use crate::config_parser::Config;
+use clier::builder::{CmdArgs, RCommand};
 use clier::display::Displayer::*;
 use clier::hooks::use_flag;
 
-use crate::app::generators::CommandGenerator;
+use crate::generators::CommandGenerator;
 
 pub fn generate_command() -> RCommand {
   RCommand::new("generate", "Generates parts of program", command).usage("generate [--flags=value]")

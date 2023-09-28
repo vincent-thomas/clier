@@ -1,6 +1,6 @@
 use std::{fs::File, io::Write, path::Path};
 
-use crate::app::config_parser::Config;
+use crate::config_parser::Config;
 
 pub struct CommandGenerator;
 

@@ -1,22 +1,19 @@
-// use clier::hooks::use_flags;
-
+use clier::display::Displayer::Error;
 use clier::hooks::{use_flag, FlagError};
 
-use crate::app::generators::ProjectGenerator;
-use crate::builder::{CmdArgs, RCommand};
+use crate::generators::ProjectGenerator;
+use clier::builder::{CmdArgs, RCommand};
 
 const NAME: &str = "new";
 const DESCRIPTION: &str = "Generate a new project in a subdir";
 
 pub fn new_command() -> RCommand {
-  RCommand::new(NAME, DESCRIPTION, command)
-    .subcommand("testing", "test", Some("test"), command)
-    .subcommand("testtestsdfs", "test", Some("test"), command)
+  RCommand::new(NAME, DESCRIPTION, command).usage("new <project_name> [options]")
 }
 
 fn command(args: CmdArgs) -> i32 {
   let project_name = args.args.commands.get(0).unwrap_or_else(|| {
-    eprintln!("Project name is required");
+    Error.write("Project name is required");
     std::process::exit(1);
   });
 

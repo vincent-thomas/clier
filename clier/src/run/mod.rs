@@ -34,10 +34,10 @@ pub struct Meta {
   pub name: String,
   /// Description of the binary application
   pub description: String,
-  /// Usage examples. Used for clearance in help command
-  pub usage: Option<String>,
   /// Version
   pub version: String,
+  /// Usage examples. Used for clearance in help command
+  pub usage: Option<String>,
 }
 
 /// Trait Runnable

@@ -37,7 +37,7 @@ clier = \"{CLIER_VERSION}\"
 
     let _ = File::create(path.join("src/main.rs"))
       .unwrap()
-      .write_all(include_bytes!("../../../examples/parser.rs"));
+      .write_all(include_bytes!("../../../clier/examples/parser.rs"));
 
     let _ = File::create(path.join("clier.config.json")).unwrap().write_all(
       "

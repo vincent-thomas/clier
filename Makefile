@@ -1,19 +1,16 @@
 
 
 default:
-	@cargo clippy
+	@cargo clippy -q
 
 build:
 	@cargo build
 
 build-release:
-	@cargo build -q --release
-
-build-examples:
-	@cargo build -q --examples
+	@cargo build --release
 
 test:
-	@cargo test
+	@cargo nextest r && cargo test --doc
 
 doc:
 	@cargo doc --no-deps
