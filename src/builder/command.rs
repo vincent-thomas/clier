@@ -1,12 +1,24 @@
-use super::{flag::RFlag, Handler};
+use super::{flag::RFlag, Flag};
+use crate::Argv;
 
+/// Handler
+pub type Handler = fn(args: CmdArgs) -> i32;
+
+/// The CmdArgs struct that is passed to all command handlers.
 #[derive(Debug, Clone)]
+pub struct CmdArgs {
+  /// struct 'Argv' contains parsed flags and commands.
+  pub args: Argv,
+  /// Registered flags for the command by the struct 'Command::flag'.
+  pub registered_flags: Vec<(String, Flag)>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) struct RunnableCommand {
   /// The function to run command.
   pub handler: Handler,
-  /// Usage of the command. Displayed in help.
-  pub usage: Option<String>,
-
+  // / Usage of the command. Displayed in help.
+  // pub usage: Option<String>,
   /// Registered Flags that are required for command to run. Passed down with [crate::hooks::use_flags] hook.
   pub flags: Option<Vec<RFlag>>,
   /// The description of the command.
@@ -65,8 +77,12 @@ impl RCommand {
   /// .flag("flag-name", Some('f'), "flag description" /* <-- In help */);
   /// ```
   /// Alot of these properties/builder methods are no necesserialy required, but are usefull for the user in the help output.
-
+  /// # Panics
+  /// Panics if name contains a dot, internal reasons.
   pub fn new(name: &str, description: &str, handler: Handler) -> Self {
+    let name_contains_dot = !name.contains('.');
+    assert!(name_contains_dot);
+
     Self {
       name: name.to_string(),
       description: description.to_string(),

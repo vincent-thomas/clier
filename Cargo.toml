@@ -9,13 +9,16 @@ repository = "https://github.com/vincent-thomas/clier"
 keywords = ["cli", "parser", "parse"]
 documentation = "https://docs.rs/clier"
 
-
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [features]
 macros = []
+
+[[bench]]
+name = "parser_bench"
+harness = false
 
 [dependencies]
 console = "0.15.7"
@@ -24,9 +27,5 @@ serde_json = "1.0.106"
 thiserror = "1.0.48"
 
 [dev-dependencies]
-cargo-rdme = "1.4.2"
 criterion = "0.5.1"
 
-[[bench]]
-name = "parser_bench"
-harness = false

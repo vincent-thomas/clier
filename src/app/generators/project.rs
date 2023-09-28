@@ -4,6 +4,8 @@ use std::path::Path;
 
 pub struct ProjectGenerator;
 
+const CLIER_VERSION: &str = env!("CARGO_PKG_VERSION");
+
 impl ProjectGenerator {
   pub fn generate(name: impl Into<String>, description: impl Into<String>) {
     let name = name.into();
@@ -15,6 +17,7 @@ impl ProjectGenerator {
     }
 
     let _ = create_dir(path.join("src"));
+    let _ = create_dir(path.join("src/commands"));
 
     let _ = File::create(path.join("Cargo.toml")).unwrap().write_all(
       format!(
@@ -26,9 +29,8 @@ edition = \"2021\"
 description = \"{description}\"
 
 [dependencies]
-clier = \"{version}\"
+clier = \"{CLIER_VERSION}\"
 ",
-        version = env!("CARGO_PKG_VERSION"),
       )
       .as_bytes(),
     );
@@ -36,5 +38,13 @@ clier = \"{version}\"
     let _ = File::create(path.join("src/main.rs"))
       .unwrap()
       .write_all(include_bytes!("../../../examples/parser.rs"));
+
+    let _ = File::create(path.join("clier.config.json")).unwrap().write_all(
+      "
+{
+  \"command_dir\": \"./src/commands\"
+}"
+      .as_bytes(),
+    );
   }
 }

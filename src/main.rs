@@ -12,11 +12,7 @@ const NAME: &str = env!("CARGO_PKG_NAME");
 const DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
 
 fn main() -> Result<clier::run::ExitCode, Error> {
-  let meta = Meta::new(NAME, DESCRIPTION, VERSION);
-  let cli = Clier::parse()
-    .meta(&meta)
-    .root("test", |_a| 0)?
-    .command(generate_command())?
-    .command(new_command())?;
-  cli.run()
+  let meta = Meta::new(NAME, DESCRIPTION, VERSION).usage("THis is the usage");
+  let app = Clier::parse().meta(&meta).command(generate_command()).command(new_command());
+  app.run()
 }

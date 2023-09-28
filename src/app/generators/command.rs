@@ -1,5 +1,6 @@
-use super::Config;
-use std::{fs::File, io::Write};
+use std::{fs::File, io::Write, path::Path};
+
+use crate::app::config_parser::Config;
 
 pub struct CommandGenerator;
 
@@ -8,21 +9,32 @@ impl CommandGenerator {
     config: Config,
     name: impl Into<String>,
     description: impl Into<String>,
+    force: bool,
+    dry_run: bool,
   ) -> Result<(), std::io::Error> {
     let name = name.into();
     let description = description.into();
 
     let file_path = format!("{}/{}.rs", &config.command_dir, name);
-    let mut file = File::create(file_path).unwrap();
-    let file_writing = file.write_all(
-      format!(
-        "use clier::command::{{CmdArgs, Command}};
+    let does_exist = Path::new(&file_path).exists();
+    if does_exist && !force {
+      return Err(std::io::Error::new(
+        std::io::ErrorKind::AlreadyExists,
+        format!("File already exists: {}", file_path),
+      ));
+    }
+    if !dry_run {
+      let mut file = File::create(file_path).unwrap();
 
-const NAME: &'static str = \"{name}\";
-const DESCRIPTION: &'static str = \"{description}\";
+      let file_writing = file.write_all(
+        format!(
+          "use clier::builder::{{CmdArgs, RCommand}};
+
+const NAME: &str = \"{name}\";
+const DESCRIPTION: &str = \"{description}\";
 
 pub fn {name}_command() -> Command {{
-  Command::new(NAME, DESCRIPTION, command)
+  RCommand::new(NAME, DESCRIPTION, command)
 }}
 
 fn command(args: CmdArgs) -> i32 {{
@@ -30,10 +42,11 @@ fn command(args: CmdArgs) -> i32 {{
     0
 }}
 ",
-      )
-      .as_bytes(),
-    );
-
-    file_writing
+        )
+        .as_bytes(),
+      );
+      return file_writing;
+    };
+    Ok(())
   }
 }

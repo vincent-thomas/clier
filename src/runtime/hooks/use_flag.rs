@@ -1,9 +1,10 @@
+use std::collections::HashMap;
+
 use super::FlagError;
-use crate::prelude::Flags;
 
 #[derive(Debug, Clone, PartialEq)]
 /// FlagData
-pub struct FlagData(pub Option<String>);
+pub struct FlagData(Option<String>);
 
 impl TryInto<bool> for FlagData {
   type Error = FlagError;
@@ -38,7 +39,6 @@ impl TryInto<String> for FlagData {
     }
   }
 }
-
 impl FlagData {
   /// Check is the flag value is empty
   pub fn is_empty(self) -> bool {
@@ -46,7 +46,11 @@ impl FlagData {
   }
 }
 /// Using flag
-pub fn use_flag(name: &'static str, short: Option<char>, flags: &Flags) -> FlagData {
+pub fn use_flag(
+  name: &'static str,
+  short: Option<char>,
+  flags: &HashMap<String, String>,
+) -> FlagData {
   let contains_name = flags.contains_key(&name.to_string());
   let contains_short =
     if let Some(short) = short { flags.contains_key(&short.to_string()) } else { false };
@@ -66,24 +70,19 @@ pub fn use_flag(name: &'static str, short: Option<char>, flags: &Flags) -> FlagD
   FlagData(to_return)
 }
 
-#[cfg(test)]
-mod tests {
+#[test]
+fn test_use_flag() {
   use std::collections::HashMap;
 
-  use super::*;
+  let mut args = HashMap::new();
 
-  #[test]
-  fn test() {
-    let mut args = HashMap::new();
+  args.insert("name".to_string(), "test".to_string());
+  let flag = use_flag("name", Some('n'), &args);
+  assert_eq!(flag, FlagData(Some("test".to_string())));
 
-    args.insert("name".to_string(), "test".to_string());
-    let flag = use_flag("name", Some('n'), &args);
-    assert_eq!(flag, FlagData(Some("test".to_string())));
+  let mut args = HashMap::new();
 
-    let mut args = HashMap::new();
-
-    args.insert("n".to_string(), "test".to_string());
-    let flag = use_flag("name", Some('n'), &args);
-    assert_eq!(flag, FlagData(Some("test".to_string())));
-  }
+  args.insert("n".to_string(), "test".to_string());
+  let flag = use_flag("name", Some('n'), &args);
+  assert_eq!(flag, FlagData(Some("test".to_string())));
 }

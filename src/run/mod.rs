@@ -1,10 +1,12 @@
+mod help;
+mod resolver;
+
 use super::{AlreadyHasMeta, MissingMeta};
 use crate::builder::{CmdArgs, Handler, RCommand};
-use crate::resolver::{flag_resolver, resolve_command, Action};
 use crate::Clier;
 use crate::{prelude::*, Argv};
-mod help;
 use help::help;
+use resolver::{flag_resolver, resolve_command, Action};
 use std::process::Termination;
 
 use console::Term;
@@ -41,13 +43,9 @@ pub struct Meta {
 /// Trait Runnable
 pub trait Runnable {
   /// Add Command to Self.
-  fn command(self, cmd: RCommand) -> Result<Self, Error>
-  where
-    Self: Sized;
+  fn command(self, cmd: RCommand) -> Self;
   /// Generate root command where no arguments is passed.
-  fn root(self, description: &str, handler: Handler) -> Result<Self, Error>
-  where
-    Self: Sized;
+  fn root(self, description: &str, handler: Handler) -> Self;
   /// Add multiple commands to Self. Overrides all previous commands.
   fn commands(self, cmd: Vec<RCommand>) -> Self;
   /// Get all registered commands.nd>) -> Self;
@@ -89,20 +87,12 @@ impl Clier<MissingMeta> {
 }
 
 impl Runnable for Clier<AlreadyHasMeta> {
-  fn command(mut self, cmd: RCommand) -> Result<Self, Error> {
-    if cmd.name.contains('.') {
-      Err(Error::InvalidFormat(cmd.name))
-      // panic!(
-      //   "{:?}",
-      //   crate::prelude::Error::InvalidFormat(String::from("'name' can't contain '.'",))
-      // );
-    } else {
-      self.registered_commands.push(cmd);
-      Ok(self)
-    }
+  fn command(mut self, cmd: RCommand) -> Self {
+    self.registered_commands.push(cmd);
+    self
   }
 
-  fn root(self, description: &str, handler: Handler) -> Result<Self, Error> {
+  fn root(self, description: &str, handler: Handler) -> Self {
     let options = self.clone().options.0;
     let mut root_command = RCommand::new("root", description, handler);
 
@@ -118,9 +108,9 @@ impl Runnable for Clier<AlreadyHasMeta> {
   }
 
   fn run(self) -> Result<ExitCode, Error> {
-    let result = resolve_command(&self.args, &self.registered_commands);
+    let what_to_do = resolve_command(&self.args, &self.registered_commands);
 
-    match result {
+    match what_to_do {
       Action::ShowHelp(commands) => {
         help(&commands, &self.args.commands, self.clone().options.0);
         Ok(0.into())
@@ -134,11 +124,10 @@ impl Runnable for Clier<AlreadyHasMeta> {
         let registered_flags = flag_resolver(&command.flags.unwrap_or(vec![]), &self.args.flags);
         match registered_flags {
           Ok(flags) => {
-            let commands = if name.split('.').count() == 1 {
-              self.args.commands
-            } else {
-              self.args.commands[name.split('.').count()..].to_vec()
-            };
+            let mut commands = self.args.commands;
+            for _ in 0..name.split('.').count() {
+              commands.remove(0);
+            }
 
             let exit_code = (command.handler)(CmdArgs {
               args: Argv { flags: self.args.flags, commands },

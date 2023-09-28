@@ -1,4 +1,4 @@
-#![deny(missing_docs)]
+#![deny(warnings, missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 //! # Command Line Argument Parser for Rust
@@ -54,8 +54,8 @@
 pub mod builder;
 /// Error enum
 pub mod error;
-/// Hooks for runtime of app, inspired by react.
-pub mod hooks;
+mod runtime;
+pub use runtime::*;
 /// Short hand for building commands and flags
 /// ## Check source for code
 #[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
@@ -66,7 +66,6 @@ pub mod run;
 
 mod parser;
 mod prelude;
-mod resolver;
 pub use parser::Argv;
 
 use run::Meta;

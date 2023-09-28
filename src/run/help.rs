@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use crate::builder::{RFlag, RunnableCommand};
 use crate::prelude::*;
-
 use crate::Meta;
 use console::{style, Term};
 
@@ -68,8 +67,9 @@ pub(crate) fn help(commands: &HashMap<String, RunnableCommand>, args: &[String],
     commands
       .iter()
       .filter_map(|v| {
-        let tes = v.0.starts_with(&args.join(".")) && v.0.clone() != args.join(".");
-        if tes {
+        let starts_with_valid_path = v.0.starts_with(&args.join("."));
+        let is_actual_path = v.0.clone() != args.join(".");
+        if starts_with_valid_path && is_actual_path {
           Some((v.0.strip_prefix(&f!("{}.", args.join("."))).unwrap().to_string(), v.1))
         } else {
           None
@@ -100,68 +100,4 @@ pub(crate) fn help(commands: &HashMap<String, RunnableCommand>, args: &[String],
     options.description,
     flags,
   )
-
-  // let children_commands = match (matcher, is_root) {
-  //   (None, false) => commands
-  //     .iter()
-  //     .filter(|v| v.0.contains('.'))
-  //     .map(|v| (v.0.to_owned(), v.1))
-  //     .collect::<Vec<(String, &RunnableCommand)>>(),
-  //   (None, true) => commands
-  //     .iter()
-  //     .filter(|v| !v.0.contains('.'))
-  //     .map(|v| (v.0.to_owned(), v.1))
-  //     .collect::<Vec<(String, &RunnableCommand)>>(),
-
-  //   (Some(_), _) => {
-  //     commands.iter().map(|v| (v.0.to_owned(), v.1)).collect::<Vec<(String, &RunnableCommand)>>()
-  //   }
-  // };
-
-  // let children_map: HashMap<String, &RunnableCommand> = HashMap::from_iter(
-  //   children_commands
-  //     .iter()
-  //     .filter_map(|v| {
-  //       println!("{:?} {:?} {args:?}", v.0.split(".").collect::<Vec<&str>>() == args, v.0);
-  //       Some((v.0.to_owned(), v.1))
-  //       // if let Some(command_name) = v.0.strip_prefix(f!("{}.", &args.join(".").as_str()).as_str()) {
-  //       //   Some((command_name.to_owned(), v.1))
-  //       // } else {
-  //       //   None
-  //       // }
-  //     })
-  //     .collect::<Vec<(String, &RunnableCommand)>>(),
-  // );
-
-  // let flags = if let Some(m) = matcher { m.clone().flags.unwrap_or(vec![]) } else { vec![] };
-
-  // help_renderer(
-  //   children_map,
-  //   prog_name,
-  //   options.usage,
-  //   options.version,
-  //   options.description,
-  //   flags,
-  // );
-  // let matcher = command::matcher(commands, args);
-
-  // if let Some(child_command) = matcher {
-  //   help_renderer(
-  //     child_command.children,
-  //     prog_name,
-  //     child_command.usage,
-  //     options.version,
-  //     options.description,
-  //     child_command.flags,
-  //   );
-  // } else {
-  //   help_renderer(
-  //     Some(commands),
-  //     prog_name,
-  //     options.usage,
-  //     options.version,
-  //     options.description,
-  //     None,
-  //   )
-  // }
 }

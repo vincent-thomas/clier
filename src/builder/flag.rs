@@ -1,5 +1,5 @@
 /// Registered Flag
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct RFlag {
   /// Name
   pub name: String,

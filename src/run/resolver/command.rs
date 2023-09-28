@@ -7,26 +7,27 @@ use crate::{
   Argv,
 };
 
-pub enum Action1 {
+pub enum FlagsAction {
   ShowHelp,
   ShowVersion,
   Nothing,
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) enum Action {
   RunCommand(String, RunnableCommand),
   ShowHelp(HashMap<String, RunnableCommand>),
   ShowVersion,
 }
-fn global_flags(argv: &Argv) -> Action1 {
+fn global_flags(argv: &Argv) -> FlagsAction {
   let is_version = use_flag("version", Some('v'), &argv.flags).try_into().unwrap_or(false);
   let is_help = use_flag("help", Some('h'), &argv.flags).try_into().unwrap_or(false);
   if is_version {
-    Action1::ShowVersion
+    FlagsAction::ShowVersion
   } else if is_help {
-    Action1::ShowHelp
+    FlagsAction::ShowHelp
   } else {
-    Action1::Nothing
+    FlagsAction::Nothing
   }
 }
 fn format_commands(registered_commands: &[RCommand]) -> HashMap<String, RunnableCommand> {
@@ -50,7 +51,7 @@ fn format_commands(registered_commands: &[RCommand]) -> HashMap<String, Runnable
       name,
       RunnableCommand {
         handler: val.handler,
-        usage: val.usage,
+        // usage: val.usage,
         flags: val.flags,
         description: val.description,
       },
@@ -64,9 +65,9 @@ fn format_commands(registered_commands: &[RCommand]) -> HashMap<String, Runnable
 pub(crate) fn resolve_command(argv: &Argv, registered_commands: &[RCommand]) -> Action {
   let commands = format_commands(registered_commands);
   match global_flags(argv) {
-    Action1::ShowHelp => return Action::ShowHelp(commands),
-    Action1::ShowVersion => return Action::ShowVersion,
-    Action1::Nothing => {}
+    FlagsAction::ShowHelp => return Action::ShowHelp(commands),
+    FlagsAction::ShowVersion => return Action::ShowVersion,
+    FlagsAction::Nothing => {}
   };
 
   if let Some(command_to_run) = commands.get(argv.commands.join(".").as_str()) {
@@ -95,4 +96,66 @@ pub(crate) fn resolve_command(argv: &Argv, registered_commands: &[RCommand]) -> 
   } else {
     Action::ShowHelp(commands)
   }
+}
+
+// Write test cases for the following functions:
+// - global_flags
+// - format_commands
+// - resolve_command
+#[test]
+fn test_flags() {
+  let action = resolve_command(
+    &Argv {
+      commands: vec!["command".to_string(), "subcommands".to_string()],
+      flags: HashMap::from([
+        ("version".to_string(), "true".to_string()),
+        ("help".to_string(), "false".to_string()),
+      ]),
+    },
+    &[],
+  );
+
+  assert_eq!(action, Action::ShowVersion);
+
+  let action = resolve_command(
+    &Argv {
+      commands: vec!["command".to_string(), "subcommands".to_string()],
+      flags: HashMap::from([
+        ("version".to_string(), "false".to_string()),
+        ("help".to_string(), "true".to_string()),
+      ]),
+    },
+    &[],
+  );
+
+  assert_eq!(action, Action::ShowHelp(HashMap::new()));
+}
+
+#[test]
+fn test_resolve_commands() {
+  // Måste vara funktion p.g.a man jämför minnesadresser till funktionen.
+  let handler = |_args| 0;
+
+  let action = resolve_command(
+    &Argv {
+      commands: vec!["command".to_string(), "subcommands".to_string()],
+      flags: HashMap::new(),
+    },
+    &[RCommand {
+      name: "command".to_string(),
+      description: "description".to_string(),
+      handler,
+      usage: None,
+      flags: None,
+      children: None,
+    }],
+  );
+
+  assert_eq!(
+    action,
+    Action::RunCommand(
+      "command".to_string(),
+      RunnableCommand { description: "description".to_string(), handler, flags: None }
+    )
+  );
 }

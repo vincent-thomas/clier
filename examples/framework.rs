@@ -25,5 +25,5 @@ fn main() -> Result<ExitCode, error::Error> {
       0
     });
 
-  clier.meta(&meta).command(first_command)?.run()
+  clier.meta(&meta).command(first_command).run()
 }
