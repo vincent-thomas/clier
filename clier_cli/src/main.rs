@@ -9,7 +9,7 @@ use commands::generate::generate_command;
 use commands::new::new_command;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
-const NAME: &str = env!("CARGO_PKG_NAME");
+const NAME: &str = env!("CARGO_BIN_NAME");
 const DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
 
 fn main() -> Result<clier::run::ExitCode, Error> {

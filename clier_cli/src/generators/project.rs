@@ -35,13 +35,21 @@ clier = \"{CLIER_VERSION}\"
       .as_bytes(),
     );
 
-    let _ = File::create(path.join("src/main.rs"))
-      .unwrap()
-      .write_all(include_bytes!("../../../clier/examples/parser.rs"));
+    let _ = File::create(path.join("src/main.rs")).unwrap().write_all(
+      r#"
+use clier::Argv;
+use clier::Clier;
+
+fn main() {
+  let args: Argv = Clier::parse().args;
+  println!("{:#?}", args);
+}
+"#
+      .as_bytes(),
+    );
 
     let _ = File::create(path.join("clier.config.json")).unwrap().write_all(
-      "
-{
+      "{
   \"command_dir\": \"./src/commands\"
 }"
       .as_bytes(),
