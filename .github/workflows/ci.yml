@@ -11,15 +11,13 @@ env:
 jobs:
   build-test:
     name: Build and test
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Build
       run: cargo check
     - name: Run tests
-      run: cargo test --verbose
+      run: cargo test
 
   bench:
     name: Benchmark

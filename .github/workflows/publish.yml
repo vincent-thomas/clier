@@ -10,16 +10,23 @@ env:
 jobs:
   publish:
     name: Build and test
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
     - name: Build
-      run: cargo check --verbose
+      run: cargo check
     - name: Run tests
-      run: cargo test --verbose
-    - name: publish
+      run: cargo test
+    - name: Publish clier
       run: cargo publish --token ${{ secrets.CARGO_TOKEN}} -p clier
+      env:
+        CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
+    - name: Publish clier_parser
+      run: cargo publish --token ${{ secrets.CARGO_TOKEN}} -p clier_parser
+      env:
+        CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
+    - name: Publish clier_cli
+      run: cargo publish --token ${{ secrets.CARGO_TOKEN}} -p clier_cli
       env:
         CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}

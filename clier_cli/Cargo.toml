@@ -1,11 +1,11 @@
 [package]
-name = "clier_app"
-version = "0.1.0"
+name = "clier_cli"
+version = "0.6.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clier = { version = "0.5.0", path = "../clier" }
+clier = { version = "0.6.1", path = "../clier" }
 serde = "1.0.188"
 serde_json = "1.0.107"

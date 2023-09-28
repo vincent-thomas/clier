@@ -1,2 +1,2 @@
 [workspace]
-members = ["clier", "clier_app", "clier_parser"]
+members = ["clier", "clier_cli", "clier_parser"]
