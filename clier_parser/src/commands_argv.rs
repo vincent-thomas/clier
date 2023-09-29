@@ -1,11 +1,20 @@
 use super::utils::{is_long_flag, is_short_flag};
 
 pub fn filter_commands(index: &usize, command: &str, all_args: &[String]) -> bool {
-  let may_flag_index = (if *index == 0 { 1 } else { *index }) - 1;
+  if is_long_flag(command) || is_short_flag(command) {
+    return false;
+  }
 
-  let is_current_flag = is_short_flag(command.clone()) || is_long_flag(command.clone());
-  let may_flag = all_args.get(may_flag_index);
-  let is_before_flag = may_flag.is_some_and(|v| is_short_flag(v) || is_long_flag(v));
+  let mut before_arg = all_args.get((if *index == 0 { 1 } else { *index }) - 1).cloned();
 
-  !(is_before_flag && is_current_flag || command.starts_with('-'))
+  if before_arg.is_none() {
+    let value = String::from("placeholder");
+    before_arg = Some(value);
+  }
+
+  if is_long_flag(before_arg.clone().unwrap()) || is_short_flag(before_arg.unwrap()) {
+    return false;
+  }
+
+  true
 }

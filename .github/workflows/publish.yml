@@ -18,15 +18,15 @@ jobs:
       run: cargo check
     - name: Run tests
       run: cargo test
-    - name: Publish clier_parser
-      run: cargo publish -p clier_parser
-      env:
-        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
-    - name: Publish clier
-      run: cargo publish -p clier
-      env:
-        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
-    - name: Publish clier_cli
-      run: cargo publish -p clier_cli
-      env:
-        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
+    # - name: Publish clier_parser
+    #   run: cargo publish -p clier_parser
+    #   env:
+    #     CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
+    # - name: Publish clier
+    #   run: cargo publish -p clier
+    #   env:
+    #     CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
+    # - name: Publish clier_cli
+    #   run: cargo publish -p clier_cli
+    #   env:
+    #     CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}

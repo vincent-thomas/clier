@@ -23,7 +23,7 @@ harness = false
 [dependencies]
 console = "0.15.7"
 thiserror = "1.0.48"
-clier_parser = { version = "0.6.2", path = "../clier_parser" }
+clier_parser = { version = "0.7.0", path = "../clier_parser" }
 
 
 [dev-dependencies]
