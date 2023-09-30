@@ -1,11 +1,11 @@
 [package]
 name = "clier_parser"
-version = "0.7.0"
+version = "0.7.1"
 edition = "2021"
 authors = ["Vincent Thomas"]
 description = "The underlying parser for the cli framework clier"
 license = "MIT"
 repository = "https://github.com/vincent-thomas/clier"
 keywords = ["cli", "parser"]
-documentation = "https://docs.rs/clier"
+documentation = "https://docs.rs/clier_parser"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

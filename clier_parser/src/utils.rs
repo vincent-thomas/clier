@@ -10,10 +10,8 @@ pub fn is_long_flag(flag: impl Into<String>) -> bool {
 
 pub fn strip_dash(flag: impl Into<String>) -> String {
   let flag = flag.into();
-  flag
-    .strip_prefix(if is_long_flag(flag.clone()) { "--" } else { "-" })
-    .map(|v| v.to_string())
-    .expect("shiiit")
+  let prefix = if is_long_flag(flag.clone()) { "--" } else { "-" };
+  flag.strip_prefix(prefix).map(|v| v.to_string()).expect("Unable to strip dash")
 }
 
 #[test]
