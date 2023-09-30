@@ -10,11 +10,7 @@ pub mod builder;
 pub mod error;
 mod runtime;
 pub use runtime::*;
-/// Short hand for building commands and flags
-/// ## Check source for code
-#[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
-#[cfg(feature = "macros")]
-pub mod macros;
+
 /// Run
 pub mod run;
 
@@ -61,6 +57,8 @@ impl Clier<MissingMeta> {
 }
 
 /// Short for generating command with [Command::new](crate::builder::RCommand)
+#[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
+#[cfg(feature = "macros")]
 #[macro_export]
 macro_rules! cmd {
   ($cmd_name:expr, $desc:expr, $function:expr) => {
