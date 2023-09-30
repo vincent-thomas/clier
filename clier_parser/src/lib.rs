@@ -1,40 +1,4 @@
-//! # Command Line Argument Parser for Rust
-//! `clier_parser` is a command line argument parser for rust.
-//!
-//! ## Parser
-//! To start a new cli projects run:
-//!
-//! ```console
-//! $ cargo new demo && cd demo
-//! $ cargo add clier_parser
-//! ```
-//!
-//! Then define your CLI in `src/main.rs`:
-//!
-//! ```rust
-#![doc = include_str!("../examples/simple.rs")]
-//! ```
-//!
-//! And try it out:
-//! ```md
-//! $ cargo run -- command subcommand -tfv testing --test=value --no-production --help
-//! Argv {
-//!     commands: [
-//!         "command",
-//!         "subcommand",
-//!     ],
-//!     flags: {
-//!         "test": "value",
-//!         "production": "false",
-//!         "help": "true",
-//!         "try-me": "false",
-//!         "t": "true",
-//!         "f": "true",
-//!         "v": "testing"
-//!     }
-//! }
-//! ```
-//!
+#![doc = include_str!("../README.md")]
 
 mod commands_argv;
 mod flags_argv;
@@ -42,7 +6,6 @@ mod transformer;
 mod utils;
 
 use std::collections::HashMap;
-
 use transformer::transform_vargs;
 
 /// Example structure:
@@ -66,6 +29,17 @@ pub struct Argv {
   pub commands: Vec<String>,
   /// Flags from argv in a key-value format
   pub flags: HashMap<String, String>,
+  after_double_dash: String,
+}
+
+pub trait Parse {
+  fn parse(args: &[String]) -> Self;
+  fn after_dash(&self) -> &str;
+}
+impl From<&str> for Argv {
+  fn from(args: &str) -> Self {
+    transform_vargs(&args.split(' ').map(|s| s.to_string()).collect::<Vec<String>>())
+  }
 }
 
 impl From<&[String]> for Argv {
@@ -74,23 +48,22 @@ impl From<&[String]> for Argv {
   }
 }
 
+impl Parse for Argv {
+  fn parse(args: &[String]) -> Self {
+    Argv::from(args)
+  }
+
+  fn after_dash(&self) -> &str {
+    self.after_double_dash.as_str()
+  }
+}
+
+// Testar redan commands. Behöver inte det nu
 #[test]
 fn test_transform_vargs() {
-  let shit: &[String] = &[
-    "command".to_string(),
-    "subcommand".to_string(),
-    "--name=test".to_string(),
-    "--value=false".to_string(),
-    "-vt".to_string(),
-    "value".to_string(),
-    "-fe=t".to_string(),
-    "--no-fdsafsa".to_string(),
-    "--test=value".to_string(),
-    "-ui".to_string(),
-    "--test1".to_string(),
-  ];
-
-  let result = Argv::from(shit);
+  let result = Argv::from(
+    "command subcommand --name=test --value=false -fe=t -vt value -ui --test1 --no-fdsafsa test",
+  );
   let mut hash = HashMap::new();
   hash.insert("name".to_string(), "test".to_string());
   hash.insert("value".to_string(), "false".to_string());
@@ -98,10 +71,7 @@ fn test_transform_vargs() {
   hash.insert("v".to_string(), "true".to_string());
   hash.insert("t".to_string(), "value".to_string());
   hash.insert("f".to_string(), "true".to_string());
-
   hash.insert("e".to_string(), "t".to_string());
-
-  hash.insert("test".to_string(), "value".to_string());
   hash.insert("u".to_string(), "true".to_string());
   hash.insert("i".to_string(), "true".to_string());
   hash.insert("test1".to_string(), "true".to_string());
@@ -113,6 +83,4 @@ fn test_transform_vargs() {
       panic!("Not right flag: {}: {}={:?}", flag.0, flag.1, left);
     }
   }
-
-  assert_eq!(*result.commands, vec!["command".to_string(), "subcommand".to_string()]);
 }

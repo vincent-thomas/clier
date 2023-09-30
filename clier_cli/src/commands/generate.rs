@@ -13,7 +13,7 @@ pub fn generate_command() -> RCommand {
 }
 
 fn command(args: CmdArgs) -> i32 {
-  let dry_run = use_flag("dry-run", None, &args.args.flags).try_into().unwrap_or(false);
+  let dry_run = use_flag("dry-run", None, &args.args).try_into().unwrap_or(false);
 
   if dry_run {
     Info.write("Dry run is enabled");
@@ -36,7 +36,7 @@ fn command(args: CmdArgs) -> i32 {
       }
     }
 
-    let command_name = match use_flag("name", Some('n'), &args.args.flags).try_into() {
+    let command_name = match use_flag("name", Some('n'), &args.args).try_into() {
       Ok(value) => value,
       Err(_) => {
         let may_name = args.args.commands.get(1);
@@ -48,8 +48,8 @@ fn command(args: CmdArgs) -> i32 {
       }
     };
     let description =
-      use_flag("desc", Some('d'), &args.args.flags).try_into().unwrap_or("todo...".to_string());
-    let force = use_flag("force", Some('f'), &args.args.flags).try_into().unwrap_or(false);
+      use_flag("desc", Some('d'), &args.args).try_into().unwrap_or("todo...".to_string());
+    let force = use_flag("force", Some('f'), &args.args).try_into().unwrap_or(false);
     if force {
       Info.write("Force flag is enabled");
     }

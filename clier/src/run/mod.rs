@@ -129,11 +129,12 @@ impl Runnable for Clier<AlreadyHasMeta> {
               commands.remove(0);
             }
 
-            let exit_code = (command.handler)(CmdArgs {
-              args: Argv { flags: self.args.flags, commands },
-              registered_flags: flags,
-            })
-            .into();
+            let mut args_default = Argv::default();
+            args_default.commands = commands;
+            args_default.flags = self.args.flags;
+
+            let exit_code =
+              (command.handler)(CmdArgs { args: args_default, registered_flags: flags }).into();
             Ok(exit_code)
           }
           Err(flag) => {

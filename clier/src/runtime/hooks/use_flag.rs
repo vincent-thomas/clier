@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use clier_parser::Argv;
+
 use super::FlagError;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -46,11 +48,8 @@ impl FlagData {
   }
 }
 /// Using flag
-pub fn use_flag(
-  name: &'static str,
-  short: Option<char>,
-  flags: &HashMap<String, String>,
-) -> FlagData {
+pub fn use_flag(name: &'static str, short: Option<char>, argv: &Argv) -> FlagData {
+  let flags: HashMap<String, String> = argv.flags.clone();
   let contains_name = flags.contains_key(&name.to_string());
   let contains_short =
     if let Some(short) = short { flags.contains_key(&short.to_string()) } else { false };
@@ -72,17 +71,15 @@ pub fn use_flag(
 
 #[test]
 fn test_use_flag() {
-  use std::collections::HashMap;
+  let mut args = Argv::default();
 
-  let mut args = HashMap::new();
-
-  args.insert("name".to_string(), "test".to_string());
+  args.flags.insert("name".to_string(), "test".to_string());
   let flag = use_flag("name", Some('n'), &args);
   assert_eq!(flag, FlagData(Some("test".to_string())));
 
-  let mut args = HashMap::new();
+  let mut args = Argv::default();
 
-  args.insert("n".to_string(), "test".to_string());
+  args.flags.insert("n".to_string(), "test".to_string());
   let flag = use_flag("name", Some('n'), &args);
   assert_eq!(flag, FlagData(Some("test".to_string())));
 }

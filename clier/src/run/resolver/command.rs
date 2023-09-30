@@ -20,8 +20,8 @@ pub(crate) enum Action {
   ShowVersion,
 }
 fn global_flags(argv: &Argv) -> FlagsAction {
-  let is_version = use_flag("version", Some('v'), &argv.flags).try_into().unwrap_or(false);
-  let is_help = use_flag("help", Some('h'), &argv.flags).try_into().unwrap_or(false);
+  let is_version = use_flag("version", Some('v'), argv).try_into().unwrap_or(false);
+  let is_help = use_flag("help", Some('h'), argv).try_into().unwrap_or(false);
   if is_version {
     FlagsAction::ShowVersion
   } else if is_help {

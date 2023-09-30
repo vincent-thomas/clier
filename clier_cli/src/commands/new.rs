@@ -17,7 +17,7 @@ fn command(args: CmdArgs) -> i32 {
     std::process::exit(1);
   });
 
-  let desc: Result<String, FlagError> = use_flag("desc", Some('d'), &args.args.flags).try_into();
+  let desc: Result<String, FlagError> = use_flag("desc", Some('d'), &args.args).try_into();
   let desc = desc.unwrap_or("todo...".to_string());
   ProjectGenerator::generate(project_name, desc);
   0

@@ -43,7 +43,7 @@ fn test_use_flags() {
   .into_iter()
   .collect();
 
-  let args = CmdArgs { registered_flags, args: Argv { commands: vec![], flags: HashMap::new() } };
+  let args = CmdArgs { registered_flags, args: Argv::from("") };
 
   let result = use_flags(&args);
   assert_eq!(result.len(), 2);

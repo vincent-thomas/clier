@@ -1,7 +1,6 @@
 #[test]
 fn test_resolve_commands() {
   use crate::run::resolver::resolve_command;
-  use std::collections::HashMap;
 
   use crate::{
     builder::{RCommand, RunnableCommand},
@@ -12,10 +11,7 @@ fn test_resolve_commands() {
   let handler = |_args| 0;
 
   let action = resolve_command(
-    &Argv {
-      commands: vec!["command".to_string(), "subcommands".to_string()],
-      flags: HashMap::new(),
-    },
+    &Argv::from("command subcommand"),
     &[RCommand {
       name: "command".to_string(),
       description: "description".to_string(),
@@ -40,10 +36,7 @@ fn test_resolve_commands() {
   );
 
   let action = resolve_command(
-    &Argv {
-      commands: vec!["command".to_string(), "subcommand".to_string()],
-      flags: HashMap::new(),
-    },
+    &Argv::from("command subcommand"),
     &[
       RCommand {
         name: "command".to_string(),

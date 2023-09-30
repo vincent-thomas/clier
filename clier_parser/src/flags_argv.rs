@@ -8,7 +8,7 @@ fn long_flag_handler(flag: String, next_arg: Option<&String>) -> Vec<(String, St
     let key_value_vec: Vec<&str> = key_and_value.split('=').collect();
     let is_invalid_many_equal = key_value_vec.len() > 2;
 
-    if is_invalid_many_equal {
+    if is_invalid_many_equal || key_and_value.starts_with("no-") {
       return vec![];
     }
 
@@ -54,7 +54,6 @@ pub fn transform_flags_argv(args: &[String]) -> HashMap<String, String> {
   let parsed = args
     .iter()
     .enumerate()
-    // Is valid flag?
     .filter(|(_, flag)| filter_flag(flag.as_str()))
     .flat_map(|(index, flag)| -> Vec<(String, String)> {
       let next_arg = args.get(index + 1);
@@ -65,7 +64,6 @@ pub fn transform_flags_argv(args: &[String]) -> HashMap<String, String> {
       };
 
       let default_values_short_flags = key_and_value.chars().map(|v| (v, "true".to_string()));
-
       if has_no_value_for_last_flag(index, flag, args) {
         return default_values_short_flags.map(|(first, last)| (first.to_string(), last)).collect();
       }
