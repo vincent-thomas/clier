@@ -3,8 +3,8 @@ mod resolver;
 
 use super::{AlreadyHasMeta, MissingMeta};
 use crate::builder::{CmdArgs, Handler, RCommand};
+use crate::prelude::*;
 use crate::Clier;
-use crate::{prelude::*, Argv};
 use help::help;
 use resolver::{flag_resolver, resolve_command, Action};
 use std::process::Termination;
@@ -124,12 +124,12 @@ impl Runnable for Clier<AlreadyHasMeta> {
         let registered_flags = flag_resolver(&command.flags.unwrap_or(vec![]), &self.args.flags);
         match registered_flags {
           Ok(flags) => {
-            let mut commands = self.args.commands;
+            let mut commands = self.args.commands.clone();
             for _ in 0..name.split('.').count() {
               commands.remove(0);
             }
 
-            let mut args_default = Argv::default();
+            let mut args_default = self.args.clone();
             args_default.commands = commands;
             args_default.flags = self.args.flags;
 
@@ -138,7 +138,7 @@ impl Runnable for Clier<AlreadyHasMeta> {
             Ok(exit_code)
           }
           Err(flag) => {
-            println!("Flag not found: {flag}");
+            eprintln!("Flag not found: {flag}");
             Ok(1.into())
           }
         }
