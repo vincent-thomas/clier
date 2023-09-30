@@ -1,52 +1,6 @@
 #![deny(warnings, missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
-
-//! # Command Line Argument Parser for Rust
-//! `Clier` is a command line argument parser and command framework for rust.
-//!
-//! ## Parser
-//! To start a new cli projects run:
-//!
-//! ```console
-//! $ cargo new demo && cd demo
-//! $ cargo add clier
-//! ```
-//!
-//! Then define your CLI in `src/main.rs`:
-//!
-//! ```rust
-#![doc = include_str!("../examples/parser.rs")]
-//! ```
-//!
-//! And try it out:
-//! ```md
-//! $ cargo run -- command subcommand --test=value --no-production --help --try-me=false
-//! Argv {
-//!     commands: [
-//!         "command",
-//!         "subcommand",
-//!     ],
-//!     flags: {
-//!         "test": "value",
-//!         "production": "false",
-//!         "help": "true",
-//!         "try-me": "false",
-//!     },
-//! }
-//! ```
-//!
-//! ## Framework
-//! To start a new cli app run:
-//!
-//! ```console
-//! $ cargo new demo-app && cd demo-app
-//! $ cargo add clier
-//! ```
-//!
-//! Then define your CLI in `src/main.rs`:
-//! ```rust
-#![doc = include_str!("../examples/framework.rs")]
-//! ```
+#![doc = include_str!("../README.md")]
 
 // region: Imports
 
@@ -104,4 +58,15 @@ impl Clier<MissingMeta> {
   pub fn with_args(args: &[String]) -> Clier<MissingMeta> {
     Clier { options: MissingMeta, registered_commands: vec![], args: Argv::from(args) }
   }
+}
+
+/// Short for generating command with [Command::new](crate::builder::RCommand)
+#[macro_export]
+macro_rules! cmd {
+  ($cmd_name:expr, $desc:expr, $function:expr) => {
+    $crate::builder::RCommand::new($cmd_name, $desc, $function)
+  };
+  ($cmd_name:expr, $desc:expr, $function:expr, $usage:expr) => {
+    $crate::builder::RCommand::new($cmd_name, $desc, $function).usage($usage)
+  };
 }

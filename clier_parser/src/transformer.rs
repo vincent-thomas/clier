@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::flags_argv::transform_flags_argv;
 use crate::{commands_argv, Argv};
 use commands_argv::transform_command_argv;
@@ -37,6 +35,7 @@ pub fn transform_vargs(args: &[String]) -> Argv {
 // Testar redan commands. Behöver inte det nu
 #[test]
 fn test_transform_vargs() {
+  use std::collections::HashMap;
   let result = transform_vargs(
     "command subcommand --name=test --value=false -fe=t -vt value -ui --test1 --no-fdsafsa test"
       .split(' ')
