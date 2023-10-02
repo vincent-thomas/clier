@@ -1,11 +1,10 @@
 #![doc = include_str!("../README.md")]
-
 mod commands_argv;
-mod flags_argv;
+mod flags;
 mod transformer;
 mod utils;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, env::args};
 use transformer::transform_vargs;
 
 /// Example structure:
@@ -32,28 +31,28 @@ pub struct Argv {
   after_double_dash: String,
 }
 
-pub trait Parse {
-  fn parse(args: &[String]) -> Self;
-  fn after_dash(&self) -> &str;
-}
 impl From<&str> for Argv {
   fn from(args: &str) -> Self {
     transform_vargs(&args.split(' ').map(|s| s.to_string()).collect::<Vec<String>>())
   }
 }
-
+impl From<String> for Argv {
+  fn from(args: String) -> Self {
+    transform_vargs(&args.split(' ').map(|s| s.to_string()).collect::<Vec<String>>())
+  }
+}
 impl From<&[String]> for Argv {
   fn from(args: &[String]) -> Self {
     transform_vargs(args)
   }
 }
 
-impl Parse for Argv {
-  fn parse(args: &[String]) -> Self {
-    Argv::from(args)
+impl Argv {
+  pub fn parse() -> Self {
+    Argv::from(args().collect::<Vec<String>>().as_slice())
   }
 
-  fn after_dash(&self) -> &str {
+  pub fn after_dashes(&self) -> &str {
     self.after_double_dash.as_str()
   }
 }
