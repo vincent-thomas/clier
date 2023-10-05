@@ -15,7 +15,7 @@ pub use runtime::*;
 pub mod run;
 
 mod prelude;
-pub use clier_parser::Argv;
+use clier_parser::Argv;
 
 use run::Meta;
 use std::env::args;

@@ -8,7 +8,7 @@ const NAME: &str = "new";
 const DESCRIPTION: &str = "Generate a new project in a subdir";
 
 pub fn new_command() -> RCommand {
-  RCommand::new(NAME, DESCRIPTION, command).usage("new <project_name> [options]")
+  RCommand::new(NAME, DESCRIPTION, command)
 }
 
 fn command(args: CmdArgs) -> i32 {

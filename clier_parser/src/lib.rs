@@ -1,20 +1,21 @@
 #![doc = include_str!("../README.md")]
 mod commands_argv;
 mod flags;
-mod transformer;
 mod utils;
 
-use std::{collections::HashMap, env::args};
-use transformer::transform_vargs;
+use commands_argv::transform_command_argv;
+use flags::transform_flags_argv;
+use std::{collections::HashMap, env};
+use utils::remove_dashdash;
 
 /// Example structure:
 /// ```markdown
 /// Argv {
-///   commands: [
+///   commands: Vec<String> [
 ///      "command",
 ///      "subcommand",
 ///    ],
-///    flags: {
+///    flags: HashMap<String, String> {
 ///      "test": "value",
 ///      "production": "false",
 ///      "help": "true",
@@ -31,28 +32,38 @@ pub struct Argv {
   after_double_dash: String,
 }
 
-impl From<&str> for Argv {
-  fn from(args: &str) -> Self {
-    transform_vargs(&args.split(' ').map(|s| s.to_string()).collect::<Vec<String>>())
-  }
-}
-impl From<String> for Argv {
-  fn from(args: String) -> Self {
-    transform_vargs(&args.split(' ').map(|s| s.to_string()).collect::<Vec<String>>())
-  }
-}
-impl From<&[String]> for Argv {
-  fn from(args: &[String]) -> Self {
-    transform_vargs(args)
-  }
-}
-
 impl Argv {
   pub fn parse() -> Self {
-    Argv::from(args().collect::<Vec<String>>().as_slice())
+    Argv::from(&env::args().collect::<Vec<String>>()[1..])
   }
 
   pub fn after_dashes(&self) -> &str {
     self.after_double_dash.as_str()
+  }
+  fn transform_vargs(args: &[String]) -> Argv {
+    let (args, after_double_dash) = remove_dashdash(args);
+    let flags = transform_flags_argv(&args);
+    let commands = transform_command_argv(&args);
+
+    Argv { commands, flags, after_double_dash }
+  }
+}
+
+impl From<&str> for Argv {
+  fn from(args: &str) -> Self {
+    let args = args.split(' ').map(|value| value.to_string()).collect::<Vec<String>>();
+    Argv::transform_vargs(&args)
+  }
+}
+impl From<String> for Argv {
+  fn from(args: String) -> Self {
+    let args = args.split(' ').map(|value| value.to_string()).collect::<Vec<String>>();
+    Argv::transform_vargs(&args)
+  }
+}
+impl From<&[String]> for Argv {
+  fn from(args: &[String]) -> Self {
+    let args = args.iter().map(|value| value.to_string()).collect::<Vec<String>>();
+    Argv::transform_vargs(&args)
   }
 }

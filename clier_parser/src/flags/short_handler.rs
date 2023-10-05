@@ -1,7 +1,7 @@
+use itertools::Itertools;
 use std::str::Chars;
 
 use crate::utils::{is_long_flag, is_short_flag};
-use itertools::Itertools;
 
 fn has_no_value_for_last_flag(index: usize, flag: &str, args: &[String]) -> bool {
   let contains_equal = flag.contains('=');

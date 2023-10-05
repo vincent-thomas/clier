@@ -1,7 +1,7 @@
 use std::env::args;
 
-use clier::Argv;
 use clier::Clier;
+use clier_parser::Argv;
 
 fn main() {
   let raw_args = args().collect::<Vec<String>>();

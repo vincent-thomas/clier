@@ -16,7 +16,7 @@ fn test_resolve_commands() {
       name: "command".to_string(),
       description: "description".to_string(),
       handler,
-      usage: Some("test".into()),
+      // usage: Some("test".into()),
       flags: None,
       children: None,
     }],
@@ -30,7 +30,7 @@ fn test_resolve_commands() {
         description: "description".to_string(),
         handler,
         flags: None,
-        usage: Some("test".into())
+        // usage: Some("test".into())
       }
     )
   );
@@ -42,7 +42,7 @@ fn test_resolve_commands() {
         name: "command".to_string(),
         description: "description".to_string(),
         handler,
-        usage: None,
+        // usage: None,
         flags: None,
         children: None,
       },
@@ -50,7 +50,7 @@ fn test_resolve_commands() {
         name: "command.subcommand".to_string(),
         description: "description".to_string(),
         handler,
-        usage: None,
+        // usage: None,
         flags: None,
         children: None,
       },
@@ -61,7 +61,11 @@ fn test_resolve_commands() {
     action,
     Action::RunCommand(
       "command.subcommand".to_string(),
-      RunnableCommand { description: "description".to_string(), handler, flags: None, usage: None }
+      RunnableCommand {
+        description: "description".to_string(),
+        handler,
+        flags: None, /*usage: None*/
+      }
     )
   );
 }

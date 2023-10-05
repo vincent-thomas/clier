@@ -9,7 +9,7 @@ use clier::hooks::use_flag;
 use crate::generators::CommandGenerator;
 
 pub fn generate_command() -> RCommand {
-  RCommand::new("generate", "Generates parts of program", command).usage("generate [--flags=value]")
+  RCommand::new("generate", "Generates parts of program", command)
 }
 
 fn command(args: CmdArgs) -> i32 {

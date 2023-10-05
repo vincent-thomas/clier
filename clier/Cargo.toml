@@ -19,5 +19,4 @@ macros = []
 [dependencies]
 console = "0.15.7"
 thiserror = "1.0.48"
-clier_parser = { version = "0.7.2", path = "../clier_parser" }
-
+clier_parser = {path = "../clier_parser", version = "0.7.3"}

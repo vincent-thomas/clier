@@ -12,15 +12,15 @@ fn first_command_handler(args: CmdArgs) -> i32 {
 fn main() -> Result<ExitCode, error::Error> {
   let clier = Clier::parse();
 
-  let meta = Meta::new("clier-example-framework", "This is the description", "1.0.0");
+  let meta =
+    Meta::new("clier-example-framework", "This is the description", "1.0.0").usage("<command>");
   let first_command = RCommand::new("first-command", "Command description", first_command_handler)
-    .usage("test")
     .flag("tes", None, "testing")
-    .subcommand("name", "descriptin", None, |_| {
+    .subcommand("name", "descriptin", |_| {
       /* Code goes here */
       0 /* <- Exit code */
     })
-    .subcommand("andra", "descriptin", None, |_| {
+    .subcommand("andra", "descriptin", |_| {
       /* Code goes here */
       0
     });

@@ -1,6 +1,8 @@
 mod long_handler;
 mod short_handler;
 use crate::utils::{is_long_flag, is_short_flag, strip_dash};
+use long_handler::long_flag_handler;
+use short_handler::short_handler;
 use std::collections::HashMap;
 
 fn filter_flag(flag: &str) -> bool {
@@ -23,9 +25,9 @@ pub fn transform_flags_argv(args: &[String]) -> HashMap<String, String> {
       let key_and_value = strip_dash(flag);
 
       if is_long_flag(flag) {
-        long_handler::long_flag_handler(flag.clone(), next_arg)
+        long_flag_handler(flag.clone(), next_arg)
       } else {
-        short_handler::short_handler(key_and_value, index, args)
+        short_handler(key_and_value, index, args)
       }
     })
     .collect::<Vec<(String, String)>>();

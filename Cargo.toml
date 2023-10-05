@@ -1,3 +1,5 @@
 [workspace]
 members = ["clier", "clier_cli", "clier_parser"]
 resolver = "2"
+
+exclude = ["clier_derive"]

@@ -1,5 +1,7 @@
 use super::{flag::RFlag, Flag};
-use crate::Argv;
+use clier_parser::Argv;
+// use proc_macro::TokenStream;
+// use syn::{self, parse_macro_input, Data, Fields, Ident};
 
 /// Handler
 pub type Handler = fn(args: CmdArgs) -> i32;
@@ -17,8 +19,8 @@ pub struct CmdArgs {
 pub(crate) struct RunnableCommand {
   /// The function to run command.
   pub handler: Handler,
-  /// Usage of the command. Displayed in help.
-  pub usage: Option<String>,
+  // /// Usage of the command. Displayed in help.
+  // pub usage: Option<String>,
   /// Registered Flags that are required for command to run. Passed down with [crate::hooks::use_flags] hook.
   pub flags: Option<Vec<RFlag>>,
   /// The description of the command.
@@ -50,8 +52,8 @@ pub struct RCommand {
   pub name: String,
   /// The function to run command.
   pub handler: Handler,
-  /// Usage of the command. Displayed in help.
-  pub usage: Option<String>,
+  // / Usage of the command. Displayed in help.
+  // pub usage: Option<String>,
   /// Registered Flags that are required for command to run. Passed down with [crate::hooks::use_flags] hook.
   pub flags: Option<Vec<RFlag>>,
   /// The description of the command.
@@ -87,17 +89,17 @@ impl RCommand {
       name: name.to_string(),
       description: description.to_string(),
       flags: None,
-      usage: None,
+      // usage: None,
       handler,
       children: None,
     }
   }
 
-  /// Add usage to [RCommand]
-  pub fn usage(mut self, usage: &str) -> Self {
-    self.usage = Some(usage.to_string());
-    self
-  }
+  // /// Add usage to [RCommand]
+  // pub fn usage(mut self, usage: &str) -> Self {
+  //   self.usage = Some(usage.to_string());
+  //   self
+  // }
 
   /// Adds a flag to [RCommand]
   pub fn flag(mut self, name: &str, short: Option<char>, description: &str) -> Self {
@@ -143,14 +145,14 @@ impl RCommand {
     mut self,
     name: &str,
     description: &str,
-    usage: Option<&str>,
+    // usage: Option<&str>,
     handler: Handler,
   ) -> Self {
-    let mut new_command = Self::new(name, description, handler);
+    let new_command = Self::new(name, description, handler);
 
-    if let Some(usage) = usage {
-      new_command = new_command.usage(usage);
-    }
+    // if let Some(usage) = usage {
+    //   new_command = new_command.usage(usage);
+    // }
     let mut children = self.children.unwrap_or(vec![]);
     children.push(new_command);
     self.children = Some(children);

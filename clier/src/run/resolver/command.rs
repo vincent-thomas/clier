@@ -51,7 +51,7 @@ fn format_commands(registered_commands: &[RCommand]) -> HashMap<String, Runnable
       name,
       RunnableCommand {
         handler: val.handler,
-        usage: val.usage,
+        // usage: val.usage,
         flags: val.flags,
         description: val.description,
       },
