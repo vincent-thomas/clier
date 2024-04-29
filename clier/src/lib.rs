@@ -15,7 +15,7 @@ pub use runtime::*;
 pub mod run;
 
 mod prelude;
-use clier_parser::Argv;
+pub use clier_parser::Argv;
 
 use run::Meta;
 use std::env::args;
@@ -63,8 +63,5 @@ impl Clier<MissingMeta> {
 macro_rules! cmd {
   ($cmd_name:expr, $desc:expr, $function:expr) => {
     $crate::builder::RCommand::new($cmd_name, $desc, $function)
-  };
-  ($cmd_name:expr, $desc:expr, $function:expr, $usage:expr) => {
-    $crate::builder::RCommand::new($cmd_name, $desc, $function).usage($usage)
   };
 }

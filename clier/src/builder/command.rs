@@ -1,4 +1,5 @@
-use super::{flag::RFlag, Flag};
+use super::flag::RFlag;
+use super::Flag;
 use clier_parser::Argv;
 // use proc_macro::TokenStream;
 // use syn::{self, parse_macro_input, Data, Fields, Ident};
@@ -12,7 +13,7 @@ pub struct CmdArgs {
   /// struct 'Argv' contains parsed flags and commands.
   pub args: Argv,
   /// Registered flags for the command by the struct 'Command::flag'.
-  pub registered_flags: Vec<(String, Flag)>,
+  pub registered_flags: Vec<(String, Flag)>
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -24,9 +25,8 @@ pub(crate) struct RunnableCommand {
   /// Registered Flags that are required for command to run. Passed down with [crate::hooks::use_flags] hook.
   pub flags: Option<Vec<RFlag>>,
   /// The description of the command.
-  pub description: String,
-  // / Subcommands of the command.
-  // pub children: Option<Vec<RCommand>>,
+  pub description: String // / Subcommands of the command.
+                          // pub children: Option<Vec<RCommand>>,
 }
 
 /// The Command struct to initialize a new command.
@@ -41,7 +41,6 @@ pub(crate) struct RunnableCommand {
 ///   /* Your logic */
 ///   0 // <-- i32: Exit Code of program, success = 0
 /// })
-/// .usage("command [usage text]")
 /// .flag("flag-name", Some('f'), "flag description" /* <-- In help */);
 /// ```
 /// Alot of these properties/builder methods are no necesserialy required, but are usefull for the user in the help output.
@@ -59,7 +58,7 @@ pub struct RCommand {
   /// The description of the command.
   pub description: String,
   /// Subcommands of the command.
-  pub children: Option<Vec<RCommand>>,
+  pub children: Option<Vec<RCommand>>
 }
 
 impl RCommand {
@@ -75,7 +74,6 @@ impl RCommand {
   ///   /* Your logic */
   ///   0 // <-- i32: Exit Code of program, success = 0
   /// })
-  /// .usage("command [usage text]")
   /// .flag("flag-name", Some('f'), "flag description" /* <-- In help */);
   /// ```
   /// Alot of these properties/builder methods are no necesserialy required, but are usefull for the user in the help output.
@@ -91,19 +89,13 @@ impl RCommand {
       flags: None,
       // usage: None,
       handler,
-      children: None,
+      children: None
     }
   }
 
-  // /// Add usage to [RCommand]
-  // pub fn usage(mut self, usage: &str) -> Self {
-  //   self.usage = Some(usage.to_string());
-  //   self
-  // }
-
   /// Adds a flag to [RCommand]
   pub fn flag(mut self, name: &str, short: Option<char>, description: &str) -> Self {
-    let mut flags = self.flags.unwrap_or(vec![]);
+    let mut flags = self.flags.unwrap_or_default();
 
     let mut flag = RFlag::new(name, description.to_string());
 
@@ -127,13 +119,11 @@ impl RCommand {
   ///   /* Your logic */
   ///   0 // <-- i32: Exit Code of program, success = 0
   /// })
-  /// .usage("command [usage text]")
   /// .flag("flag-name", Some('t'), "flag description" /* <-- In help */);
   ///
   /// command.subcommand(
   ///   "subcommand",
   ///   "description",
-  ///   Some("usage"),
   ///   |_args| {
   ///    /* Your logic */
   ///    0 // <-- i32: Exit Code of program, success = 0
@@ -141,19 +131,13 @@ impl RCommand {
   /// ```
   ///
   /// It has almost the same methods and builder methods as a [RCommand]
-  pub fn subcommand(
-    mut self,
-    name: &str,
-    description: &str,
-    // usage: Option<&str>,
-    handler: Handler,
-  ) -> Self {
+  pub fn subcommand(mut self, name: &str, description: &str, handler: Handler) -> Self {
     let new_command = Self::new(name, description, handler);
 
     // if let Some(usage) = usage {
     //   new_command = new_command.usage(usage);
     // }
-    let mut children = self.children.unwrap_or(vec![]);
+    let mut children = self.children.unwrap_or_default();
     children.push(new_command);
     self.children = Some(children);
     self

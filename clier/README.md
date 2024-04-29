@@ -1,9 +1,11 @@
 # Clier
 
 ## Command Line Argument Parser for Rust
+
 `Clier` is a command line argument parser and command framework for rust.
 
 ### Parser
+
 To start a new cli projects run:
 
 ```console
@@ -25,24 +27,25 @@ fn main() {
 ```
 
 And try it out:
-```md
 
+```md
 $ cargo run -- command subcommand --test=value --no-production --help --try-me=false
 Argv {
-    commands: [
-        "command",
-        "subcommand",
-    ],
-    flags: {
-        "test": "value",
-        "production": "false",
-        "help": "true",
-        "try-me": "false",
-    },
+commands: [
+"command",
+"subcommand",
+],
+flags: {
+"test": "value",
+"production": "false",
+"help": "true",
+"try-me": "false",
+},
 }
 ```
 
 ### Framework
+
 ```rust
 use clier::builder::{CmdArgs, RCommand};
 use clier::error;
@@ -60,13 +63,12 @@ fn main() -> Result<ExitCode, error::Error> {
 
   let meta = Meta::new("clier-example-framework", "This is the description", "1.0.0");
   let first_command = RCommand::new("first-command", "Command description", first_command_handler)
-    .usage("test")
     .flag("tes", None, "testing")
-    .subcommand("name", "descriptin", None, |_| {
+    .subcommand("name", "descriptin", |_| {
       /* Code goes here */
       0 /* <- Exit code */
     })
-    .subcommand("andra", "descriptin", None, |_| {
+    .subcommand("andra", "descriptin", |_| {
       /* Code goes here */
       0
     });

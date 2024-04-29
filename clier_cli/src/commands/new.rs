@@ -12,7 +12,7 @@ pub fn new_command() -> RCommand {
 }
 
 fn command(args: CmdArgs) -> i32 {
-  let project_name = args.args.commands.get(0).unwrap_or_else(|| {
+  let project_name = args.args.commands.first().unwrap_or_else(|| {
     Error.write("Project name is required");
     std::process::exit(1);
   });

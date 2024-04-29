@@ -5,7 +5,8 @@ mod utils;
 
 use commands_argv::transform_command_argv;
 use flags::transform_flags_argv;
-use std::{collections::HashMap, env};
+use std::collections::HashMap;
+use std::env;
 use utils::remove_dashdash;
 
 /// Example structure:
@@ -21,6 +22,7 @@ use utils::remove_dashdash;
 ///      "help": "true",
 ///      "try-me": "false",
 ///    }
+///    after_double_dash: ""
 /// }
 /// ```
 #[derive(Debug, Clone, Default, PartialEq)]
@@ -29,7 +31,7 @@ pub struct Argv {
   pub commands: Vec<String>,
   /// Flags from argv in a key-value format
   pub flags: HashMap<String, String>,
-  after_double_dash: String,
+  after_double_dash: String
 }
 
 impl Argv {

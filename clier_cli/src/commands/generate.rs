@@ -19,7 +19,7 @@ fn command(args: CmdArgs) -> i32 {
     Info.write("Dry run is enabled");
   }
 
-  let type_ = match args.args.commands.get(0) {
+  let type_ = match args.args.commands.first() {
     Some(value) => value,
     None => {
       eprintln!("Command not found");
