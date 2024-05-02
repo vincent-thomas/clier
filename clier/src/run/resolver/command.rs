@@ -1,23 +1,21 @@
 use std::collections::HashMap;
 
-use crate::{
-  builder::{RCommand, RunnableCommand},
-  hooks::use_flag,
-  prelude::*,
-  Argv,
-};
+use crate::builder::{RCommand, RunnableCommand};
+use crate::hooks::use_flag;
+use crate::prelude::*;
+use crate::Argv;
 
 pub enum FlagsAction {
   ShowHelp,
   ShowVersion,
-  Nothing,
+  Nothing
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) enum Action {
   RunCommand(String, RunnableCommand),
   ShowHelp(HashMap<String, RunnableCommand>),
-  ShowVersion,
+  ShowVersion
 }
 fn global_flags(argv: &Argv) -> FlagsAction {
   let is_version = use_flag("version", Some('v'), argv).try_into().unwrap_or(false);
@@ -53,8 +51,8 @@ fn format_commands(registered_commands: &[RCommand]) -> HashMap<String, Runnable
         handler: val.handler,
         // usage: val.usage,
         flags: val.flags,
-        description: val.description,
-      },
+        description: val.description
+      }
     )];
     children.into_iter().flatten().for_each(|v| to_return.push(v));
     to_return
@@ -64,7 +62,7 @@ fn format_commands(registered_commands: &[RCommand]) -> HashMap<String, Runnable
 
 pub(crate) fn command_fetcher(
   argv: &Argv,
-  commands: HashMap<String, RunnableCommand>,
+  commands: HashMap<String, RunnableCommand>
 ) -> (Vec<String>, Option<RunnableCommand>) {
   let valid_args = argv
     .commands
@@ -86,6 +84,8 @@ pub(crate) fn command_fetcher(
 
 pub(crate) fn resolve_command(argv: &Argv, registered_commands: &[RCommand]) -> Action {
   let commands = format_commands(registered_commands);
+
+  dbg!(&commands);
   match global_flags(argv) {
     FlagsAction::ShowHelp => return Action::ShowHelp(commands),
     FlagsAction::ShowVersion => return Action::ShowVersion,

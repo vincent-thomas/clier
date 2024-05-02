@@ -17,42 +17,56 @@ pub mod run;
 mod prelude;
 pub use clier_parser::Argv;
 
-use run::Meta;
+// use run::Meta;
 use std::env::args;
 
 // endregion: Imports
 
 // region: Meta States
 /// Typestate pattern: State for (CliMeta)
-#[derive(Debug, Default, Clone)]
-pub struct MissingMeta;
+// #[derive(Debug, Default, Clone)]
+// pub struct MissingMeta;
 /// Typestate pattern: State for (CliMeta)
-#[derive(Debug, Clone)]
-pub struct AlreadyHasMeta(pub(crate) Meta);
+// #[derive(Debug, Clone)]
+// pub struct AlreadyHasMeta(pub(crate) Meta);
 // endregion: Meta States
 
 /// Clier is the main struct for the framework
-#[derive(Clone, Default, Debug)]
-pub struct Clier<T> {
-  pub(crate) options: T,
-  pub(crate) registered_commands: Vec<builder::RCommand>,
+#[derive(Clone, Debug, Default)]
+pub struct Clier {
+  // pub(crate) options: T,
+  pub(crate) registered_commands: Option<Commands<'static>>,
   /// Parsed arguments from the command line
-  pub args: Argv,
+  pub args: Argv
 }
 
-impl Clier<MissingMeta> {
+#[derive(Debug, Clone)]
+struct CmdMeta {
+  name: String,
+  description: String
+}
+
+impl CmdMeta {
+  pub fn new(name: &str, description: &str) -> Self {
+    CmdMeta { name: name.into(), description: description.into() }
+  }
+}
+
+#[derive(Debug, Clone)]
+enum Commands<'a> {
+  Command { meta: CmdMeta, handler: i64 },
+  Root { meta: CmdMeta, children: &'a [Commands<'a>] }
+}
+
+impl Clier {
   /// Create a new [Clier] instance and parsing
-  pub fn parse() -> Clier<MissingMeta> {
-    Clier {
-      options: MissingMeta,
-      registered_commands: vec![],
-      args: Argv::from(&args().collect::<Vec<String>>()[1..]),
-    }
+  pub fn parse() -> Clier {
+    Clier { registered_commands: None, args: Argv::from(&args().collect::<Vec<String>>()[1..]) }
   }
 
   /// Creating a new [Clier] instance with custom arguments
-  pub fn with_args(args: &[String]) -> Clier<MissingMeta> {
-    Clier { options: MissingMeta, registered_commands: vec![], args: Argv::from(args) }
+  pub fn with_args(args: &[String]) -> Clier {
+    Clier { registered_commands: None, args: Argv::from(args) }
   }
 }
 

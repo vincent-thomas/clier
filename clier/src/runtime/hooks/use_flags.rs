@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-
 use crate::builder::CmdArgs;
+use std::collections::HashMap;
 
 /// Use all registered commands
 pub fn use_flags(args: &CmdArgs) -> HashMap<String, String> {
@@ -28,16 +27,16 @@ fn test_use_flags() {
       Flag {
         name: "name".to_string(),
         description: "name".to_string(),
-        value: Some("John".to_string()),
-      },
+        value: Some("John".to_string())
+      }
     ),
     (
       "age".to_string(),
       Flag {
         name: "age".to_string(),
         description: "age".to_string(),
-        value: Some("20".to_string()),
-      },
+        value: Some("20".to_string())
+      }
     ),
   ]
   .into_iter()
