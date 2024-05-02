@@ -1,13 +1,19 @@
 use std::env::args;
 
+use clier::hooks::{use_double_dash, use_flag};
 use clier::Clier;
-use clier_parser::Argv;
 
 fn main() {
   let raw_args = args().collect::<Vec<String>>();
   let raw_args = &raw_args[1..];
-  let args: Argv = Clier::with_args(raw_args).args;
+  let args = Clier::with_args(raw_args);
 
-  assert_eq!(args, Argv::from(raw_args));
-  println!("{:#?}", args);
+  // Try changing 'String' to 'bool', or 'i64'
+  let example_hook: Result<String, clier::hooks::FlagError> =
+    use_flag("testing", Some('t'), &args).try_into();
+
+  // Everything to the right of '--'
+  let raw = use_double_dash(&args);
+
+  println!("{:#?} {:?}", example_hook, raw);
 }

@@ -1,110 +1,72 @@
-// use std::collections::HashMap;
+use crate::prelude::*;
+use crate::{CliMeta, CmdMeta, Commands};
+use console::{style, Term};
 
-// use crate::builder::{RFlag, RunnableCommand};
-// use crate::Meta;
-// use crate::{prelude::*, Argv};
-// use console::{style, Term};
+pub(crate) fn help_renderer(
+  meta: &CliMeta,
+  commands: &[Commands],
+  not_root_command_name: Option<String>
+) {
+  let term = Term::stdout();
+  meta_renderer(&term, meta, not_root_command_name);
 
-// use super::resolver::command_fetcher;
+  let mut command_groups: Vec<CmdMeta> = Vec::new();
+  let mut command_commands: Vec<CmdMeta> = Vec::new();
 
-// fn help_renderer(
-//   root_command: HashMap<String, &RunnableCommand>,
-//   name: String,
-//   usage: Option<String>,
-//   version: String,
-//   description: String,
-//   flags: Vec<RFlag>,
-// ) {
-//   let render = Term::stdout();
+  for command in commands.iter() {
+    match command.clone() {
+      Commands::Collection(collection) => {
+        command_groups.push(collection.meta);
+      }
+      Commands::Command { meta, handler: _ } => {
+        command_commands.push(meta);
+      }
+    }
+  }
 
-//   render.write_line(&f!("{} v{}", name, version)).unwrap();
-//   render.write_line(&description).unwrap();
+  if !command_groups.is_empty() {
+    let _ = term.write_line(f!("\n{}", style("Command Groups:").underlined()).as_str());
+  }
+  for group in command_groups {
+    let _ = term.write_line(f!("  {} - {}", group.name, group.description).as_str());
+  }
 
-//   if let Some(usage) = usage {
-//     let _ = render.write_line(&f!("\n{}:\n  {name} {usage}", style("Usage").underlined()));
-//   }
+  if !command_commands.is_empty() {
+    let _ = term.write_line(f!("\n{}", style("Commands:").underlined()).as_str());
+  }
+  for command in command_commands {
+    let _ = term.write_line(f!("  {} - {}", command.name, command.description).as_str());
+  }
 
-//   let longest_c_name = root_command.keys().map(|name| name.len()).max();
+  let _ = term.write_line(f!("\n{}", style("Global Flags:").underlined()).as_str());
+  if meta.version.is_some() {
+    let _ = term.write_line("  --version - Writes the current version of the program");
+  }
+  let _ = term.write_line("  --help - Writes this message");
+}
 
-//   if !root_command.is_empty() {
-//     let _ = render.write_line(&style("\nCommands:").underlined().to_string());
-//   }
+fn meta_renderer(term: &Term, meta: &CliMeta, not_root: Option<String>) {
+  let version = meta.version.unwrap();
+  let _ = term.write_line(
+    f!(
+      "{name}@{version}",
+      name = meta.name,
+      version = format_args!("{}.{}.{}", version.0, version.1, version.2)
+    )
+    .as_str()
+  );
+  let _ = term.write_line(&meta.description);
+  let mut name = String::from(&meta.name);
+  if let Some(root) = not_root {
+    name.push_str(f!(" {}", root).as_str());
 
-//   for (name, command) in root_command {
-//     let _ = render.write_line(&f!(
-//       "  {:width$}  {}",
-//       name,
-//       command.description,
-//       width = longest_c_name.unwrap()
-//     ));
-//   }
-
-//   if !flags.is_empty() {
-//     let _ = render.write_line(&style("\nFlags:").underlined().to_string());
-//     flags
-//       .into_iter()
-//       .for_each(|flag| render.write_line(&f!("  {}: {}", flag.name, flag.description)).unwrap());
-//   }
-//   let _ = render.write_line(&style("\nGlobal Flags:").underlined().to_string());
-//   let _ = render.write_line("  --help, -h     Shows this");
-//   let _ = render.write_line("  --version, -v  Shows version");
-// }
-
-// /// Prints help message
-// pub(crate) fn help(commands: &HashMap<String, RunnableCommand>, args: &[String], options: Meta) {
-//   let prog_name = if std::env::consts::OS == "windows" {
-//     f!("{}[.exe]", options.name)
-//   } else {
-//     options.name.to_string()
-//   };
-
-//   // let matcher = commands.get(args.join(".").as_str());
-//   let children: Vec<(String, &RunnableCommand)> = if args.is_empty() {
-//     commands
-//       .iter()
-//       .filter(|v| !v.0.contains('.') && v.0 != "root")
-//       .map(|v| (v.0.clone(), v.1))
-//       .collect()
-//   } else {
-//     commands
-//       .iter()
-//       .filter_map(|v| {
-//         let starts_with_valid_path = v.0.starts_with(&args.join("."));
-//         let is_actual_path = v.0.clone() != args.join(".");
-//         if starts_with_valid_path && is_actual_path {
-//           Some((v.0.strip_prefix(&f!("{}.", args.join("."))).unwrap().to_string(), v.1))
-//         } else {
-//           None
-//         }
-//       })
-//       .collect()
-//   };
-
-//   let (args, main_command) = command_fetcher(&Argv::from(args), commands.clone());
-
-//   if main_command.is_none() {
-//     if args.is_empty() {
-//       help_renderer(
-//         HashMap::from_iter(children),
-//         prog_name,
-//         options.usage,
-//         options.version,
-//         options.description,
-//         vec![],
-//       )
-//     }
-//     return;
-//   };
-//   let flags =
-//     if let Some(ref m) = main_command { m.clone().flags.unwrap_or(vec![]) } else { vec![] };
-
-//   help_renderer(
-//     HashMap::from_iter(children),
-//     prog_name,
-//     options.usage,
-//     // main_command.unwrap().usage,
-//     options.version,
-//     options.description,
-//     flags,
-//   )
-// }
+    let _ = term.write_line(
+      f!("\n{} showing help command for command group: {root}", style(" NOTE ").on_white().bold())
+        .as_str()
+    );
+  }
+  if let Some(usage) = &meta.usage {
+    let _ = term.write_line(f!("\n{}", style("Usage:").underlined()).as_str());
+    let _ = term.write_line(f!("  {} {}", name, &usage).as_ref());
+  }
+}

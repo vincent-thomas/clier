@@ -1,12 +1,11 @@
-mod help;
-mod impl_runnable;
-mod resolver;
-
-// use super::{AlreadyHasMeta, MissingMeta};
-// use crate::builder::{/* CmdArgs, */ Handler, RCommand};
-// use crate::prelude::*;
-// use crate::Clier;
+pub(crate) mod help;
+use std::fmt::Debug;
 use std::process::Termination;
+
+use crate::display::Displayer;
+use crate::hooks::{use_flag, FlagError};
+use crate::run::help::help_renderer;
+use crate::{Clier, CmdCollection, Commands, HasMeta, Runnable};
 
 /// ExitCode is a wrapper around i32 to implement Termination trait
 #[derive(Debug, Clone)]
@@ -24,61 +23,95 @@ impl From<i32> for ExitCode {
   }
 }
 
-// /// Meta information required for help and version commands
-// #[derive(Debug, Clone, Default)]
-// pub struct Meta {
-//   /// Name of the binary application
-//   pub name: String,
-//   /// Description of the binary application
-//   pub description: String,
-//   /// Version
-//   pub version: String,
-//   /// Usage examples. Used for clearance in help command
-//   pub usage: Option<String>
-// }
+impl Clier<HasMeta, Runnable> {
+  fn resolve_global_flags(&self) {
+    let log_error = Displayer::Error {};
+    let help_flag: Result<bool, FlagError> = use_flag("help", Some('h'), self).try_into();
+    let version_flag: Result<bool, FlagError> = use_flag("version", Some('v'), self).try_into();
 
-// /// Trait Runnable
-// pub trait Runnable {
-//   /// Add Command to Self.
-//   fn command(self, cmd: RCommand) -> Self;
-//   /// Generate root command where no arguments is passed.
-//   fn root(self, description: &str, handler: Handler) -> Self;
-//   /// Add multiple commands to Self. Overrides all previous commands.
-//   fn commands(self, cmd: Vec<RCommand>) -> Self;
-//   /// Get all registered commands.nd>) -> Self;
-//   // fn get_commands(&self) -> HashMap<String, RunnableCommand>;
-//   /// Runs all commands and returns [ExitCode].
-//   fn run(self) -> Result<ExitCode, Error>;
-// }
+    match (help_flag, version_flag) {
+      (Ok(_), Ok(_)) => {
+        log_error.write("Can't use flags --help and --version at the same time");
+        std::process::exit(1);
+      }
+      (Ok(_), _) => {
+        help_renderer(&self.cli_meta.0, self.registered_commands.0.as_ref(), None);
+        std::process::exit(0);
+      }
+      (_, Ok(_)) => {
+        let version = self.cli_meta.0.version;
 
-// impl Meta {
-//   /// Create new [Meta]
-//   pub fn new(
-//     name: impl Into<String>,
-//     description: impl Into<String>,
-//     version: impl Into<String>
-//   ) -> Self {
-//     Self {
-//       name: name.into(),
-//       description: description.into(),
-//       usage: None,
-//       version: version.into()
-//     }
-//   }
-//   /// Add usage to [Meta]
-//   pub fn usage(mut self, usage: &str) -> Self {
-//     self.usage = Some(usage.to_string());
-//     self
-//   }
-// }
+        match version {
+          Some((major, minor, patch)) => {
+            println!("v{major}.{minor}.{patch}");
+          }
+          None => log_error.write("No version was provided")
+        }
+        std::process::exit(0);
+      }
+      (Err(FlagError::Unexisting), Err(FlagError::Unexisting)) => {}
+      (_, _) => {
+        log_error.write("Unknown input");
+        std::process::exit(0);
+      }
+    }
+  }
+  /// .
+  pub fn run(self) -> ExitCode {
+    self.resolve_global_flags();
+    let mut command_to_exec = None;
 
-// impl Clier<MissingMeta> {
-//   /// Add [Meta] to Clier.
-//   pub fn meta(self, meta: &Meta) -> Clier<AlreadyHasMeta> {
-//     Clier {
-//       options: AlreadyHasMeta(meta.clone()),
-//       args: self.args,
-//       registered_commands: self.registered_commands,
-//     }
-//   }
-// }
+    let mut commands_to_check = self.registered_commands.0.clone();
+
+    let mut current_parent_collection = None;
+
+    for command in &self.args.commands {
+      let mut index: usize = 0;
+
+      loop {
+        if commands_to_check.is_empty() || index > commands_to_check.as_ref().len() - 1 {
+          break;
+        }
+
+        match commands_to_check[index].clone() {
+          Commands::Command { meta, handler } => {
+            if &meta.name == command {
+              command_to_exec = Some(handler);
+              break;
+            }
+          }
+          Commands::Collection(collection) => {
+            if &collection.meta.name == command {
+              commands_to_check = collection.children;
+              current_parent_collection =
+                Some(CmdCollection { meta: collection.meta, children: commands_to_check.clone() });
+              index = 0;
+              continue;
+            }
+          }
+        }
+
+        if command_to_exec.is_some() {
+          break;
+        }
+
+        index += 1;
+      }
+    }
+
+    let log_error = Displayer::Error {};
+    match command_to_exec {
+      None => {
+        if let Some(subcommand) = current_parent_collection {
+          help_renderer(&self.cli_meta.0, &subcommand.children, Some(subcommand.meta.name));
+        } else {
+          help_renderer(&self.cli_meta.0, &self.registered_commands.0, None);
+        }
+        println!();
+        log_error.write("No command found");
+        ExitCode(1)
+      }
+      Some(command) => command(self)
+    }
+  }
+}
