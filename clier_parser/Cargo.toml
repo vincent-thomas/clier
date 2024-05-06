@@ -1,6 +1,6 @@
 [package]
 name = "clier_parser"
-version = "0.7.3"
+version = "0.7.4"
 edition = "2021"
 authors = ["Vincent Thomas"]
 description = "Parser for building values and commands from command line arguments"
