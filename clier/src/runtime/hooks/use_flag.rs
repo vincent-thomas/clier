@@ -44,8 +44,9 @@ impl TryInto<i32> for FlagData {
 impl TryInto<String> for FlagData {
   type Error = FlagError;
   fn try_into(self) -> Result<String, Self::Error> {
-    match self.0 {
-      Some(value) => Ok(value),
+    match self.0.as_deref() {
+      Some("true" | "false") => Err(FlagError::InvalidFormat),
+      Some(value) => Ok(value.to_string()),
       None => Err(FlagError::Unexisting)
     }
   }

@@ -15,5 +15,5 @@ fn main() {
   // Everything to the right of '--'
   let raw = use_double_dash(&args);
 
-  println!("{:#?} {:?}", example_hook, raw);
+  println!("flag testing: {:#?}\neverything after '--': {:?}", example_hook, raw);
 }

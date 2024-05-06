@@ -14,11 +14,9 @@ Then define your CLI in `src/main.rs`:
 use std::env::args;
 use clier_parser::Argv;
 
-fn main() {
-  let args: Vec<String> = args().collect();
-  let parsed = Argv::from(args.as_slice());
-  println!("{:#?}", parsed);
-}
+let args: Vec<String> = args().collect();
+let parsed = Argv::from(args.as_slice());
+println!("{:#?}", parsed);
 ```
 
 And try it out:

@@ -10,19 +10,13 @@ fn main() {
 
   let app = clier_builder.runnable(vec![Commands::Collection(CmdCollection {
     meta: CmdMeta::new("testing", "testing"),
-    children: Box::from([
-      Commands::Command {
-        meta: CmdMeta::new("testchild", "testing"),
-        handler: |_| {
-          println!("hello");
-          ExitCode(0)
-        }
-      },
-      Commands::Collection(CmdCollection {
-        meta: CmdMeta::new("testing", "testind"),
-        children: Box::from([])
-      })
-    ])
+    children: Box::from([Commands::Command {
+      meta: CmdMeta::new("testchild", "testing"),
+      handler: |_| {
+        println!("hello");
+        ExitCode(0)
+      }
+    }])
   })]);
 
   app.run();
