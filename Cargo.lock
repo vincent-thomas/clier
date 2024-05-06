@@ -124,15 +124,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "clier_cli"
-version = "0.6.2"
-dependencies = [
- "clier",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "clier_parser"
 version = "0.7.3"
 dependencies = [

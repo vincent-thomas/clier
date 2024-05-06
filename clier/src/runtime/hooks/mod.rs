@@ -1,16 +1,5 @@
+mod use_double_dash;
 mod use_flag;
-mod use_flags;
 
+pub use use_double_dash::*;
 pub use use_flag::*;
-pub use use_flags::*;
-
-/// FlagError
-#[derive(Debug, Clone)]
-pub enum FlagError {
-  /// .
-  InvalidFormat,
-  /// .
-  Unexisting,
-  /// .
-  ParseIntError,
-}

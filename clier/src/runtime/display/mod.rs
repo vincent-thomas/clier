@@ -8,15 +8,15 @@ pub enum Displayer {
   /// .
   Error,
   /// .
-  Todo,
+  Todo
 }
 
 impl Displayer {
   fn format<'a>(self) -> StyledObject<&'a str> {
     match self {
       Self::Info => style(" INFO ").on_blue(),
-      Self::Error => style(" ERROR ").on_red(),
-      Self::Todo => style(" TODO ").on_yellow(),
+      Self::Error => style(" ERROR ").on_red().bold(),
+      Self::Todo => style(" TODO ").on_yellow()
     }
   }
   /// Write shit

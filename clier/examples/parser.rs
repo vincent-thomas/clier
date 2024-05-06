@@ -1,7 +1,10 @@
-use clier::Clier;
 use clier_parser::Argv;
 
 fn main() {
-  let args: Argv = Clier::parse().args;
-  println!("{:#?}", args);
+  let args: Argv = Argv::parse();
+  println!("{:#?}", args.commands);
+
+  if args.commands.first().unwrap() == "hello" {
+    println!("hello this is a command")
+  }
 }
