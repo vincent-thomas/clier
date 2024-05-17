@@ -1,6 +1,6 @@
 [package]
 name = "clier"
-version = "0.7.0"
+version = "0.7.1"
 edition = "2021"
 authors = ["Vincent Thomas"]
 description = "A cli parser and framework for rust"
@@ -20,3 +20,4 @@ macros = []
 console = "0.15.7"
 thiserror = "1.0.48"
 clier_parser = {path = "../clier_parser", version = "0.7.3"}
+
