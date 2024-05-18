@@ -44,7 +44,7 @@ pub struct Clier<T, R> {
   // pub(crate) options: T,
   pub(crate) registered_commands: R,
   /// Parsed arguments from the command line
-  pub(crate) args: Argv
+  pub(crate) args: Argv,
 }
 
 /// .
@@ -57,7 +57,7 @@ pub struct CliMeta {
   /// .
   pub version: Option<(u8, u8, u8)>,
   /// .
-  pub usage: Option<String>
+  pub usage: Option<String>,
 }
 
 /// testing
@@ -66,7 +66,7 @@ pub struct CmdMeta {
   /// The name
   pub name: String,
   /// The description
-  pub description: String
+  pub description: String,
 }
 /// meta
 impl CmdMeta {
@@ -82,7 +82,7 @@ pub struct CmdCollection {
   /// .
   pub meta: CmdMeta,
   /// .
-  pub children: Box<[Commands]>
+  pub children: Box<[Commands]>,
 }
 
 /// Commands
@@ -93,10 +93,10 @@ pub enum Commands {
     /// TODO
     meta: CmdMeta,
     /// TODO
-    handler: fn(clier: Clier<HasMeta, Runnable>) -> crate::run::ExitCode
+    handler: fn(clier: Clier<HasMeta, Runnable>) -> crate::run::ExitCode,
   },
   /// collection of commands
-  Collection(CmdCollection)
+  Collection(CmdCollection),
 }
 
 impl Clier<HasMeta, NotRunnable> {
@@ -117,7 +117,7 @@ impl Clier<MissingMeta, NotRunnable> {
     Clier {
       args: self.args,
       cli_meta: HasMeta(meta),
-      registered_commands: self.registered_commands
+      registered_commands: self.registered_commands,
     }
   }
   /// Create a new [Clier] instance and parsing
@@ -125,7 +125,7 @@ impl Clier<MissingMeta, NotRunnable> {
     Clier {
       registered_commands: NotRunnable,
       args: Argv::from(&args().collect::<Vec<String>>()[1..]),
-      cli_meta: MissingMeta
+      cli_meta: MissingMeta,
     }
   }
   /// Creating a new [Clier] instance with custom arguments

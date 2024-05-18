@@ -1,11 +1,10 @@
 pub(crate) mod help;
-use std::fmt::Debug;
-use std::process::Termination;
-
-use crate::display::Displayer;
+use crate::display::{label::LabelLogger, Displayer};
 use crate::hooks::{use_flag, FlagError};
 use crate::run::help::help_renderer;
 use crate::{Clier, CmdCollection, Commands, HasMeta, Runnable};
+use std::fmt::Debug;
+use std::process::Termination;
 
 /// ExitCode is a wrapper around i32 to implement Termination trait
 #[derive(Debug, Clone)]
@@ -25,13 +24,13 @@ impl From<i32> for ExitCode {
 
 impl Clier<HasMeta, Runnable> {
   fn resolve_global_flags(&self) {
-    let log_error = Displayer::Error {};
+    let log = LabelLogger::default();
     let help_flag: Result<bool, FlagError> = use_flag("help", Some('h'), self).try_into();
     let version_flag: Result<bool, FlagError> = use_flag("version", Some('v'), self).try_into();
 
     match (help_flag, version_flag) {
       (Ok(_), Ok(_)) => {
-        log_error.write("Can't use flags --help and --version at the same time");
+        log.error("Can't use flags --help and --version at the same time");
         std::process::exit(1);
       }
       (Ok(_), _) => {
@@ -45,13 +44,13 @@ impl Clier<HasMeta, Runnable> {
           Some((major, minor, patch)) => {
             println!("v{major}.{minor}.{patch}");
           }
-          None => log_error.write("No version was provided")
+          None => log.error("No version was provided"),
         }
         std::process::exit(0);
       }
       (Err(FlagError::Unexisting), Err(FlagError::Unexisting)) => {}
       (_, _) => {
-        log_error.write("Unknown input");
+        log.error("Unknown input");
         std::process::exit(0);
       }
     }
@@ -99,7 +98,7 @@ impl Clier<HasMeta, Runnable> {
       }
     }
 
-    let log_error = Displayer::Error {};
+    let log = LabelLogger::default();
     match command_to_exec {
       None => {
         if let Some(subcommand) = current_parent_collection {
@@ -108,10 +107,10 @@ impl Clier<HasMeta, Runnable> {
           help_renderer(&self.cli_meta.0, &self.registered_commands.0, None);
         }
         println!();
-        log_error.write("No command found");
+        log.error("No command found");
         ExitCode(1)
       }
-      Some(command) => command(self)
+      Some(command) => command(self),
     }
   }
 }
