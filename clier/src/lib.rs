@@ -47,17 +47,35 @@ pub struct Clier<T, R> {
   pub(crate) args: Argv,
 }
 
-/// .
+/// Should be used when describing your cli app, this will show up in your help message
 #[derive(Clone, Debug, Default)]
 pub struct CliMeta {
-  /// .
+  /// The name or executable name of your app. Preferably this should be your executable
+  /// for the reason of clarity.
   pub name: String,
-  /// .
+  /// The description of your app, for example this could include what the usecase for this
+  /// executable can be
   pub description: String,
   /// .
-  pub version: Option<(u8, u8, u8)>,
+  pub version: Option<String>,
   /// .
   pub usage: Option<String>,
+}
+
+impl CliMeta {
+  pub fn new(name: String, description: String) -> Self {
+    Self { name, description, version: None, usage: None }
+  }
+
+  pub fn version(mut self, version: impl Into<String>) -> Self {
+    self.version = Some(version.into());
+    self
+  }
+
+  pub fn usage(mut self, usage: impl Into<String>) -> Self {
+    self.version = Some(usage.into());
+    self
+  }
 }
 
 /// testing
