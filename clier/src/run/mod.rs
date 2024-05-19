@@ -38,11 +38,9 @@ impl Clier<HasMeta, Runnable> {
         std::process::exit(0);
       }
       (_, Ok(_)) => {
-        let version = self.cli_meta.0.version;
-
-        match version {
-          Some((major, minor, patch)) => {
-            println!("v{major}.{minor}.{patch}");
+        match self.cli_meta.0.version.as_ref() {
+          Some(version_exists) => {
+            println!("v{}", version_exists);
           }
           None => log.error("No version was provided"),
         }

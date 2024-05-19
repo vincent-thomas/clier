@@ -63,15 +63,16 @@ pub struct CliMeta {
 }
 
 impl CliMeta {
+  /// Create a new instance of [CliMeta]
   pub fn new(name: String, description: String) -> Self {
     Self { name, description, version: None, usage: None }
   }
-
+  /// Set the version of your app
   pub fn version(mut self, version: impl Into<String>) -> Self {
     self.version = Some(version.into());
     self
   }
-
+  /// Set the usage of your app
   pub fn usage(mut self, usage: impl Into<String>) -> Self {
     self.version = Some(usage.into());
     self

@@ -5,7 +5,7 @@ use console::{style, Term};
 pub(crate) fn help_renderer(
   meta: &CliMeta,
   commands: &[Commands],
-  not_root_command_name: Option<String>
+  not_root_command_name: Option<String>,
 ) {
   let term = Term::stdout();
   meta_renderer(&term, meta, not_root_command_name);
@@ -46,15 +46,13 @@ pub(crate) fn help_renderer(
 }
 
 fn meta_renderer(term: &Term, meta: &CliMeta, not_root: Option<String>) {
-  let version = meta.version.unwrap();
-  let _ = term.write_line(
-    f!(
-      "{name}@{version}",
-      name = meta.name,
-      version = format_args!("{}.{}.{}", version.0, version.1, version.2)
-    )
-    .as_str()
-  );
+  let version = match &meta.version {
+    Some(version) => {
+      format!("@{version}")
+    }
+    None => "".to_string(),
+  };
+  let _ = term.write_line(f!("{name}{version}", name = meta.name).as_str());
   let _ = term.write_line(&meta.description);
   let mut name = String::from(&meta.name);
   if let Some(root) = not_root {
@@ -62,7 +60,7 @@ fn meta_renderer(term: &Term, meta: &CliMeta, not_root: Option<String>) {
 
     let _ = term.write_line(
       f!("\n{} showing help command for command group: {root}", style(" NOTE ").on_white().bold())
-        .as_str()
+        .as_str(),
     );
   }
   if let Some(usage) = &meta.usage {
