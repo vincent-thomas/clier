@@ -5,7 +5,7 @@ fn main() {
     name: "example-clier".into(),
     usage: Some("[command]".into()),
     description: "testing".into(),
-    version: Some((0, 0, 0))
+    version: Some("0.0.0".into()),
   });
 
   let app = clier_builder.runnable(vec![Commands::Collection(CmdCollection {
@@ -15,8 +15,8 @@ fn main() {
       handler: |_| {
         println!("hello");
         ExitCode(0)
-      }
-    }])
+      },
+    }]),
   })]);
 
   app.run();

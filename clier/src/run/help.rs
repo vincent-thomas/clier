@@ -1,3 +1,5 @@
+use crate::display::label::LabelLogger;
+use crate::display::Displayer;
 use crate::prelude::*;
 use crate::{CliMeta, CmdMeta, Commands};
 use console::{style, Term};
@@ -58,10 +60,14 @@ fn meta_renderer(term: &Term, meta: &CliMeta, not_root: Option<String>) {
   if let Some(root) = not_root {
     name.push_str(f!(" {}", root).as_str());
 
-    let _ = term.write_line(
-      f!("\n{} showing help command for command group: {root}", style(" NOTE ").on_white().bold())
+    let log = LabelLogger::default();
+
+    log.info(format!("Showing help message for command group: {root}").as_str())
+
+    /*     let _ = term.write_line(
+      f!("\n{} showing help command for command group: {root}", style("NOTE:").underlined())
         .as_str(),
-    );
+    ); */
   }
   if let Some(usage) = &meta.usage {
     let _ = term.write_line(f!("\n{}", style("Usage:").underlined()).as_str());

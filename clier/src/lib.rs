@@ -2,8 +2,6 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
 
-// region: Imports
-
 /// Structs for easliy building entities describing the commands and flags.
 pub mod builder;
 /// Error enum
@@ -20,8 +18,6 @@ pub use clier_parser::Argv;
 // use run::Meta;
 use std::env::args;
 
-// endregion: Imports
-
 // region: States
 /// Typestate pattern: State for (CliMeta)
 #[derive(Debug, Default, Clone)]
@@ -29,10 +25,10 @@ pub struct MissingMeta;
 /// Typestate pattern: State for (CliMeta)
 #[derive(Debug, Clone)]
 pub struct HasMeta(pub CliMeta);
-/// .
+/// Symbolises when clier is not runnable.
 #[derive(Debug, Clone)]
 pub struct NotRunnable;
-/// .
+/// This means clier is runnable
 #[derive(Debug, Clone)]
 pub struct Runnable(pub Box<[Commands]>);
 // endregion: States
@@ -44,7 +40,7 @@ pub struct Clier<T, R> {
   // pub(crate) options: T,
   pub(crate) registered_commands: R,
   /// Parsed arguments from the command line
-  pub(crate) args: Argv,
+  pub args: Argv,
 }
 
 /// Should be used when describing your cli app, this will show up in your help message

@@ -18,7 +18,7 @@ impl Default for LabelLogger {
 }
 
 fn return_unstyled_label(label: &str) -> StyledObject<String> {
-  style(format!(" {label} "))
+  style(format!(" {label} ")).black()
 }
 
 impl Displayer for LabelLogger {
