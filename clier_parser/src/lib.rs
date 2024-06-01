@@ -31,7 +31,7 @@ pub struct Argv {
   pub commands: Vec<String>,
   /// Flags from argv in a key-value format
   pub flags: HashMap<String, String>,
-  after_double_dash: String
+  after_double_dash: String,
 }
 
 impl Argv {
