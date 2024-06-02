@@ -23,7 +23,7 @@ pub use clier_parser::Argv;
 pub trait FlagParser {
   /// .
   #[allow(clippy::result_unit_err)]
-  fn parse(clier2: &ClierV2) -> Self;
+  fn parse() -> Self;
 }
 
 pub use clier_derive::Parser;
@@ -34,13 +34,13 @@ pub trait Command {
   /// .
   fn description(&self) -> Option<&'static str>;
   /// .
-  fn execute(&self, clierv2: &ClierV2) -> ExitCode;
+  fn execute(&self, clierv2: &Clier) -> ExitCode;
   /// .
-  fn flags(&self, clierv2: &ClierV2) -> Vec<MetaValue>;
+  fn flags(&self, clierv2: &Clier) -> Vec<MetaValue>;
 }
 
 /// .
-pub struct ClierV2 {
+pub struct Clier {
   name: String,
   description: String,
   version: Option<String>,
@@ -52,12 +52,12 @@ pub struct ClierV2 {
 #[macro_export]
 macro_rules! clier {
   () => {
-    $crate::ClierV2::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_DESCRIPTION"))
+    $crate::Clier::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_DESCRIPTION"))
       .version(env!("CARGO_PKG_VERSION"))
   };
 }
 
-impl ClierV2 {
+impl Clier {
   ///.
   pub fn new(name: impl Into<String>, description: impl Into<String>) -> Self {
     let args = clier_parser::Argv::parse();

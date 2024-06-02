@@ -69,7 +69,7 @@ pub fn impl_flag_parser(input: DeriveInput) -> TokenStream {
   let assignments2 = meta_values.clone().map(|v| quote! {#v});
   let gen = quote! {
       impl clier::FlagParser for #name {
-          fn parse(clierv2: &clier::ClierV2) -> Self {
+          fn parse() -> Self {
               let args = clier_parser::Argv::parse().flags;
               let if_okay = #name {
                   #(#assignments),*

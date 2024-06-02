@@ -39,7 +39,7 @@ pub(crate) fn impl_command(
   };
 
   let fn_name = &ast.sig.ident;
-  let fn_name_str = fn_name.to_string().replace("_", " ");
+  let fn_name_str = fn_name.to_string().replace('_', " ");
 
   let mod_name = quote::format_ident!("__clier_internal_{}", &fn_name.to_string());
 
@@ -54,8 +54,8 @@ pub(crate) fn impl_command(
 
   let gen_fn_call = match &flag_struct {
     Some(ident) => quote! {
-      pub fn call_with_flags(argv: &clier::ClierV2) -> ExitCode {
-        let flags = #ident::parse(&argv);
+      pub fn call_with_flags(argv: &clier::Clier) -> ExitCode {
+        let flags = #ident::parse();
 
         #mod_name::#fn_name(argv.argv.clone(), flags)
       }
@@ -69,16 +69,16 @@ pub(crate) fn impl_command(
 
   let fn_execute_body = match &flag_struct {
     Some(_) => quote! {
-      #mod_name::call_with_flags(clierv2)
+      #mod_name::call_with_flags(clier)
     },
     None => quote! {
-      #mod_name::call_without_flags(&clierv2.argv.clone())
+      #mod_name::call_without_flags(&clier.argv.clone())
     },
   };
 
   let gen_flag_struct = match &flag_struct {
     Some(_) => quote! {
-      Some(#flag_struct::parse(clierv2))
+      Some(#flag_struct::parse())
     },
     None => quote! {
       None
@@ -92,7 +92,7 @@ pub(crate) fn impl_command(
           flag_struct: Option<#flag_struct>
       }
       impl #fn_name {
-        pub fn new(clierv2: &clier::ClierV2) -> Self {
+        pub fn new(clier: &clier::Clier) -> Self {
             Self { flag_struct: #gen_flag_struct }
         }
       }
@@ -100,12 +100,12 @@ pub(crate) fn impl_command(
     impl clier::Command for #fn_name {
       fn name(&self) -> &'static str {#fn_name_str}
       fn description(&self) -> Option<&'static str> {#description}
-      fn execute(&self, clierv2: &clier::ClierV2) -> clier::ExitCode {
+      fn execute(&self, clier: &clier::Clier) -> clier::ExitCode {
         let status_code = #fn_execute_body;
         return status_code;
       }
 
-        fn flags(&self, clierv2: &clier::ClierV2) -> Vec<MetaValue> {#gen_option_flag_struct}
+        fn flags(&self, clier: &clier::Clier) -> Vec<MetaValue> {#gen_option_flag_struct}
     }
   };
 

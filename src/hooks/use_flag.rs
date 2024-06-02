@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use thiserror::Error;
 
-use crate::ClierV2;
+use crate::Clier;
 
 /// FlagError
 #[derive(Debug, Error)]
@@ -116,7 +116,7 @@ impl Flag {
   }
 }
 /// Using flag
-pub fn use_flag(name: &'static str, short: Option<char>, clier: &ClierV2) -> Flag {
+pub fn use_flag(name: &'static str, short: Option<char>, clier: &Clier) -> Flag {
   let flags: &HashMap<String, String> = &clier.argv.flags;
   let contains_name = flags.contains_key(&name.to_string());
   let contains_short =
