@@ -1,13 +1,49 @@
 #![deny(warnings, missing_docs)]
 #![allow(dead_code)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
-#![doc = include_str!("../README.md")]
 
+//! ** Rust command Line app framework **
+//!
+//! Example
+//!  Run
+//!  ```sh
+//!  cargo add clier
+//!
+//!  ```
+//!
+//!  Then create a file `src/main.rs` with the following content:
+//!  ```rust
+//!  use clier::{clier, Parser, command, ExitCode};
+//!  use clier::prelude::*;
+//!  fn main() -> ExitCode {
+//!    let mut app = clier!();
+//!    app.register(build::new(&app));
+//!    return app.run();
+//!  }
+//!
+//!  #[derive(Parser, Clone, Debug)]
+//!  struct Flags {
+//!    #[meta(description = "teshjfkdsklfdsahjfklds", short = 'n')]
+//!    name: Option<String>,
+//!    test: bool,
+//!  }
+//!
+//!
+//!  #[command(description = "testing description", flags = Flags)]
+//!  fn build(argv: clier_parser::Argv, flags: Flags) -> clier::ExitCode {
+//!    println!("args {:?}", argv);
+//!    println!("flags {:?}", flags.name);
+//!    println!("flags {:?}", flags.test);
+//!    ExitCode(0)
+//!  }
+//!  ```
+//!
 mod display;
 /// Error enum
 pub mod error;
 pub use clier_derive::*;
 pub use display::*;
+use hooks::FlagError;
 /// hooks and stuff
 pub mod hooks;
 use std::collections::HashMap;
@@ -23,7 +59,9 @@ pub use clier_parser::Argv;
 pub trait FlagParser {
   /// .
   #[allow(clippy::result_unit_err)]
-  fn parse() -> Self;
+  fn parse() -> (Self, Vec<FlagError>)
+  where
+    Self: Sized;
 }
 
 pub use clier_derive::Parser;
@@ -138,8 +176,9 @@ impl Clier {
   /// .
   pub fn run(self) -> ExitCode {
     let help_flag = self.argv.flags.get("help").or(self.argv.flags.get("h"));
+
     if help_flag.is_some_and(|value| value == "true") {
-      self.help();
+      return self.help();
     }
 
     if self.argv.commands.is_empty() {
@@ -156,7 +195,7 @@ impl Clier {
     let to_match_against = self.argv.commands.join(" ");
 
     match self.commands.get(&to_match_against) {
-      Some(command) => return command.execute(&self),
+      Some(command) => command.execute(&self),
       None => self.help(),
     }
   }

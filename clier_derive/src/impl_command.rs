@@ -48,7 +48,9 @@ pub(crate) fn impl_command(
   let gen_option_flag_struct = match flag_struct.clone() {
     // FIXME: Parse works double.
     Some(_) => quote! {
-    let test: Vec<clier_utils::MetaValue> = self.flag_struct.clone().map(|x| x.__clier_internal_meta()).unwrap_or(vec![]); test },
+      let test: Vec<clier_utils::MetaValue> = self.flag_struct.clone().map(|x| x.__clier_internal_meta()).unwrap_or(vec![]);
+      test
+    },
     None => quote! {vec![]},
   };
 
@@ -57,7 +59,19 @@ pub(crate) fn impl_command(
       pub fn call_with_flags(argv: &clier::Clier) -> ExitCode {
         let flags = #ident::parse();
 
-        #mod_name::#fn_name(argv.argv.clone(), flags)
+        let meta = flags.0.__clier_internal_meta();
+        // TODO: Lägg till prioritet för FlagError
+        let error_flags: Vec<clier::hooks::FlagError> = flags.1.iter().enumerate().filter(|(i, e)| meta[*i].optional).map(|(i, e)| {println!("{:?}", &e); e}).cloned().collect();
+
+        if !error_flags.is_empty() {
+          argv.help();
+          println!("\nErrors:");
+
+          error_flags.iter().for_each(|e| println!("{e}"));
+          return clier::ExitCode(1);
+        } else {
+          return #mod_name::#fn_name(argv.argv.clone(), flags.0);
+        }
       }
     },
     None => quote! {
@@ -77,9 +91,10 @@ pub(crate) fn impl_command(
   };
 
   let gen_flag_struct = match &flag_struct {
-    Some(_) => quote! {
-      Some(#flag_struct::parse())
-    },
+    Some(_) => quote! {{
+      let test = #flag_struct::parse();
+      Some(test.0)
+    }},
     None => quote! {
       None
     },
@@ -87,13 +102,14 @@ pub(crate) fn impl_command(
 
   let gen_struct = quote! {
     #[allow(non_camel_case_types, missing_docs)]
-    #[derive(Clone)]
+    #[derive(Clone, Debug)]
     pub struct #fn_name {
-          flag_struct: Option<#flag_struct>
+          flag_struct: Option<#flag_struct>,
+          flag_errors: Vec<clier::hooks::FlagError>
       }
       impl #fn_name {
         pub fn new(clier: &clier::Clier) -> Self {
-            Self { flag_struct: #gen_flag_struct }
+            Self { flag_struct: #gen_flag_struct, flag_errors: vec![] }
         }
       }
 
@@ -105,7 +121,9 @@ pub(crate) fn impl_command(
         return status_code;
       }
 
-        fn flags(&self, clier: &clier::Clier) -> Vec<MetaValue> {#gen_option_flag_struct}
+        fn flags(&self, clier: &clier::Clier) -> Vec<MetaValue> {
+          #gen_option_flag_struct
+        }
     }
   };
 

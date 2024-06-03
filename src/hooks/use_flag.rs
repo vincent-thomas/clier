@@ -5,7 +5,7 @@ use thiserror::Error;
 use crate::Clier;
 
 /// FlagError
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 pub enum FlagError {
   // FIXME: ty: typen måste bytas från en String, de asslösning
   // NOTE: ty namnet används för att 'type' är ett keyword

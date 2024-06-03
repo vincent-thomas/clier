@@ -6,7 +6,7 @@ fn main() -> ExitCode {
 
   app.register(build::new(&app));
 
-  return app.run();
+  app.run()
 }
 
 #[derive(Parser, Clone, Debug)]

@@ -62,20 +62,22 @@ pub fn impl_flag_parser(input: DeriveInput) -> TokenStream {
     };
 
     quote! {
-      #key: clier::hooks::Flag::new(#long.to_string(), args.get(#long).or(#if_short_value).cloned()).try_into().unwrap_or_else(|e| {println!("{e}"); std::process::exit(1);})
+      #key: clier::hooks::Flag::new(#long.to_string(), args.get(#long).or(#if_short_value).cloned()).try_into().map_err(|e: clier::hooks::FlagError| {error.push(e.clone()); e}).unwrap_or_default()
     }
   });
 
   let assignments2 = meta_values.clone().map(|v| quote! {#v});
   let gen = quote! {
       impl clier::FlagParser for #name {
-          fn parse() -> Self {
+          fn parse() -> (Self, Vec<clier::hooks::FlagError>) {
               let args = clier_parser::Argv::parse().flags;
+
+              let mut error: Vec<clier::hooks::FlagError> = vec![];
               let if_okay = #name {
                   #(#assignments),*
               };
 
-              if_okay
+              (if_okay, error)
           }
       }
 
