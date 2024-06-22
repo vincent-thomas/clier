@@ -1,25 +1,20 @@
-use clier::{clier, prelude::*, Parser};
-use clier::{command, ExitCode};
+use clier::prelude::*;
+use clier::{command, Argv, ExitCode, Parser};
 
-fn main() -> ExitCode {
-  let mut app = clier!();
-
+#[clier::main]
+fn main(app: &mut clier::Clier) -> ExitCode {
   app.register(build::new(&app));
-
   app.run()
 }
 
 #[derive(Parser, Clone, Debug)]
 struct Flags {
-  #[meta(description = "teshjfkdsklfdsahjfklds", short = 'n')]
-  name: Option<String>,
-  test: bool,
+  name: String,
 }
 
-#[command(description = "testing description", flags = Flags)]
-fn build(argv: clier_parser::Argv, flags: Flags) -> clier::ExitCode {
-  println!("args {:?}", argv);
-  println!("flags {:?}", flags.name);
-  println!("flags {:?}", flags.test);
+/// detta är en kommentar
+#[command(flags = Flags)]
+fn build(argv: Argv, flags: Flags) -> clier::ExitCode {
+  println!("args {:?}", flags);
   ExitCode(0)
 }

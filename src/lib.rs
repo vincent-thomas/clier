@@ -4,43 +4,58 @@
 
 //! ** Rust command Line app framework **
 //!
-//! Example
-//!  Run
-//!  ```sh
-//!  cargo add clier
+//! ## Example
+//! Run
+//! ```sh
+//! cargo add clier
 //!
-//!  ```
+//! ```
 //!
-//!  Then create a file `src/main.rs` with the following content:
-//!  ```rust
-//!  use clier::{clier, Parser, command, ExitCode};
-//!  use clier::prelude::*;
-//!  fn main() -> ExitCode {
-//!    let mut app = clier!();
-//!    app.register(build::new(&app));
-//!    return app.run();
-//!  }
+//! Then create a file `src/main.rs` with the following content:
+//! ```rust
+//! use clier::{clier, Parser, command, ExitCode, Argv};
+//! use clier::prelude::*;
+//! fn main() -> ExitCode {
+//!   let mut app = clier!();
+//!   app.register(build::new(&app));
+//!   app.register(test::new(&app));
+//!   return app.run();
+//! }
 //!
-//!  #[derive(Parser, Clone, Debug)]
-//!  struct Flags {
-//!    #[meta(description = "teshjfkdsklfdsahjfklds", short = 'n')]
-//!    name: Option<String>,
-//!    test: bool,
-//!  }
+//! #[derive(Parser, Clone, Debug)]
+//! struct Flags {
+//!   /// The description
+//!   #[meta(short = 'n')]
+//!   name: Option<String>,
+//!   test: bool,
+//! }
+//! /// This would be the command description in the help message
+//! #[command]
+//! fn test(argv: Argv) -> clier::ExitCode {
+//!   println!("args {:?}", argv);
+//!   ExitCode(0)
+//! }
+//! /// Another command
+//! #[flags = Flags)]
+//! fn build(argv: Argv, flags: Flags) -> clier::ExitCode {
+//!   println!("args {:?}", argv);
+//!   println!("flags {:?}", flags.name);
+//!   println!("flags {:?}", flags.test);
+//!   ExitCode(0)
+//! }
+//! ```
+//! And use it:
+//! ```sh
+//! $ cargo run -- -h
+//! your_app_name@0.1.0
+//! Your simple description from Cargo.toml
 //!
-//!
-//!  #[command(description = "testing description", flags = Flags)]
-//!  fn build(argv: clier_parser::Argv, flags: Flags) -> clier::ExitCode {
-//!    println!("args {:?}", argv);
-//!    println!("flags {:?}", flags.name);
-//!    println!("flags {:?}", flags.test);
-//!    ExitCode(0)
-//!  }
-//!  ```
+//! COMMANDS:
+//!  test - This would be the command description in the help message
+//!  build - Another command
+//! ```
 //!
 mod display;
-/// Error enum
-pub mod error;
 pub use clier_derive::*;
 pub use display::*;
 use hooks::FlagError;
@@ -52,25 +67,26 @@ use clier_utils::MetaValue;
 mod exitcode;
 pub use exitcode::*;
 
-/// .
+/// Mostly imports structs and traits used under the hood. Checkout the source code for what it
+/// brings to scope.
 pub mod prelude;
 pub use clier_parser::Argv;
+
 /// .
 pub trait FlagParser {
   /// .
   #[allow(clippy::result_unit_err)]
-  fn parse() -> (Self, Vec<FlagError>)
+  fn parse() -> (Self, HashMap<String, FlagError>)
   where
     Self: Sized;
 }
 
-pub use clier_derive::Parser;
 /// .
 pub trait Command {
   /// .
   fn name(&self) -> &'static str;
   /// .
-  fn description(&self) -> Option<&'static str>;
+  fn description(&self) -> &'static str;
   /// .
   fn execute(&self, clierv2: &Clier) -> ExitCode;
   /// .
@@ -82,23 +98,14 @@ pub struct Clier {
   name: String,
   description: String,
   version: Option<String>,
-  /// .
+  /// command line arguments from [clier::Argv]
   pub argv: clier_parser::Argv,
   commands: HashMap<String, Box<dyn Command>>,
-}
-///.
-#[macro_export]
-macro_rules! clier {
-  () => {
-    $crate::Clier::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_DESCRIPTION"))
-      .version(env!("CARGO_PKG_VERSION"))
-  };
 }
 
 impl Clier {
   ///.
-  pub fn new(name: impl Into<String>, description: impl Into<String>) -> Self {
-    let args = clier_parser::Argv::parse();
+  pub fn new(name: impl Into<String>, description: impl Into<String>, args: Argv) -> Self {
     Self {
       name: name.into(),
       description: description.into(),
@@ -139,8 +146,8 @@ impl Clier {
         if flag.short.is_some() {
           help.push_str(&format!(", -{}", flag.short.unwrap()));
         }
-        if flag.description.is_some() {
-          help.push_str(&format!("\n      {}", flag.description.unwrap()));
+        if !flag.description.is_empty() {
+          help.push_str(&format!("\n        {}", flag.description.replace('\n', "\n        ")));
         }
         help.push_str(&format!(" {}", if flag.optional { "(required)" } else { "" }));
         println!("{}\n", help);
@@ -149,35 +156,48 @@ impl Clier {
 
     println!("COMMANDS:");
     for (name, item) in commands_without_root {
-      let mut command_help = format!("  {}", name);
+      let mut command_help = format!("    {}", console::style(name).underlined());
 
-      if item.description().is_some() {
-        command_help.push_str(&format!(" - {}", item.description().unwrap()));
+      if !item.description().is_empty() {
+        command_help.push_str(&format!("\n{}", item.description()).replace('\n', "\n        "));
       }
 
       println!("{}", command_help);
+      let flags = item.flags(self);
 
-      for flag in item.flags(self) {
-        let mut help = format!("    --{}", flag.long);
+      if flags.is_empty() {
+        continue;
+      }
+      println!("\n      Flags:");
+
+      for flag in flags {
+        let mut help = format!("      {}", console::style(format!("--{}", flag.long)).dim());
         if flag.short.is_some() {
-          help.push_str(&format!(", -{}", flag.short.unwrap()));
+          help
+            .push_str(&format!(", {}", console::style(format!("-{}", flag.short.unwrap())).dim()));
         }
-        if flag.optional {
-          help.push_str("   (required)");
+        if !flag.optional {
+          let required_thing = console::style("required").red();
+          help.push_str(&format!("   ({})", required_thing));
         }
-        if flag.description.is_some() {
-          help.push_str(&format!("\n      {}", flag.description.unwrap()));
+        if !flag.description.is_empty() {
+          help.push_str(&format!("\n        {}", flag.description.replace('\n', "\n        ")));
         }
         println!("{}\n", help);
       }
     }
+
+    println!("GLOBAL FLAGS:");
+    println!("    --help, -h: Show this message");
+    println!("    --version, -v: Show version");
+
     ExitCode(0)
   }
   /// .
-  pub fn run(self) -> ExitCode {
+  pub fn run(&self) -> ExitCode {
     let help_flag = self.argv.flags.get("help").or(self.argv.flags.get("h"));
 
-    if help_flag.is_some_and(|value| value == "true") {
+    if help_flag.is_some_and(|value| &*value.clone() == "true") {
       return self.help();
     }
 
@@ -195,7 +215,7 @@ impl Clier {
     let to_match_against = self.argv.commands.join(" ");
 
     match self.commands.get(&to_match_against) {
-      Some(command) => command.execute(&self),
+      Some(command) => command.execute(self),
       None => self.help(),
     }
   }

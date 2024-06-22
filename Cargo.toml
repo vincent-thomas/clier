@@ -26,3 +26,4 @@ thiserror = "1.0.48"
 clier_parser = {path = "./clier_parser", version = "0.7.3"}
 clier_derive = {path = "./clier_derive", version = "0.1.0"}
 clier_utils = {path = "./clier_utils"}
+hashbrown = "0.14.5"

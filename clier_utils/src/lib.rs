@@ -2,7 +2,7 @@ use quote::{quote, ToTokens, TokenStreamExt};
 
 #[derive(Debug, Clone)]
 pub struct MetaValue {
-  pub description: Option<String>,
+  pub description: String,
   pub short: Option<char>,
   pub long: String,
   pub optional: bool,
@@ -11,11 +11,7 @@ impl ToTokens for MetaValue {
   fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
     let MetaValue { description, short, long, optional } = self;
 
-    let desc_tokens = if let Some(description_value) = description {
-      quote! { Some(#description_value.to_string()) }
-    } else {
-      quote! { None }
-    };
+    let desc_tokens = quote! { #description.to_string() };
 
     let short_tokens = if let Some(short_value) = short {
       quote! { Some(#short_value) }

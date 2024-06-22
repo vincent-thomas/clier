@@ -1,11 +1,11 @@
-use std::collections::HashMap;
+use hashbrown::HashMap;
 
 use clier_parser::Argv;
 
 #[test]
 fn argv_from() {
   let result = Argv::from(
-    "command subcommand --name=test --value=false -fe=t -vt value -ui --ui --no-fdsafsa test"
+    "command subcommand --name=test --value=false -fe=t -vt value -ui --ui --no-fdsafsa test",
   );
   let mut hash = HashMap::new();
   hash.insert("name".to_string(), "test".to_string());

@@ -4,15 +4,9 @@ use quote::quote;
 use syn::{Ident, ItemFn};
 
 fn parse_command(args: TokenStream) -> CommandInput {
-  let mut parse_desc: Option<String> = None;
   let mut parse_struct: Option<Ident> = None;
   let parser = syn::meta::parser(|meta| {
-    if meta.path.is_ident("description") {
-      let litstr: syn::LitStr = meta.value()?.parse()?;
-      parse_desc = Some(litstr.value());
-
-      Ok(())
-    } else if meta.path.is_ident("flags") {
+    if meta.path.is_ident("flags") {
       let ident: syn::Ident = meta.value()?.parse()?;
 
       parse_struct = Some(ident);
@@ -25,7 +19,7 @@ fn parse_command(args: TokenStream) -> CommandInput {
 
   syn::parse::Parser::parse(parser, args.into()).unwrap();
 
-  CommandInput { description: parse_desc, flag_struct: parse_struct }
+  CommandInput { flag_struct: parse_struct }
 }
 
 pub(crate) fn impl_command(
@@ -33,10 +27,17 @@ pub(crate) fn impl_command(
   args: proc_macro2::TokenStream,
 ) -> proc_macro2::TokenStream {
   let args = parse_command(args.clone());
-  let description = match args.description.clone() {
-    Some(s) => quote! { Some(#s) },
-    None => quote! { None },
-  };
+
+  let description = ast
+    .attrs
+    .iter()
+    .filter_map(
+      |attr| if attr.path().is_ident("doc") { attr.path().get_ident().cloned() } else { None },
+    )
+    .filter_map(|x| x.span().source_text().clone())
+    .map(|x| x.to_string().replace("/// ", ""))
+    .collect::<Vec<String>>()
+    .join("\n");
 
   let fn_name = &ast.sig.ident;
   let fn_name_str = fn_name.to_string().replace('_', " ");
@@ -60,12 +61,17 @@ pub(crate) fn impl_command(
         let flags = #ident::parse();
 
         let meta = flags.0.__clier_internal_meta();
+
+        let mut meta_iter = meta.iter();
         // TODO: Lägg till prioritet för FlagError
-        let error_flags: Vec<clier::hooks::FlagError> = flags.1.iter().enumerate().filter(|(i, e)| meta[*i].optional).map(|(i, e)| {println!("{:?}", &e); e}).cloned().collect();
+        let error_flags: Vec<clier::hooks::FlagError> = flags.1.iter().filter(|(key, error)| {
+            let value = meta_iter.find(|x| x.long == *key.clone()).expect("Internal clier error: MetaValue of FlagError didn't exixt");
+            !value.optional
+            }).map(|(i, e)| e).cloned().collect();
 
         if !error_flags.is_empty() {
           argv.help();
-          println!("\nErrors:");
+          println!("Errors:");
 
           error_flags.iter().for_each(|e| println!("{e}"));
           return clier::ExitCode(1);
@@ -86,7 +92,7 @@ pub(crate) fn impl_command(
       #mod_name::call_with_flags(clier)
     },
     None => quote! {
-      #mod_name::call_without_flags(&clier.argv.clone())
+      #mod_name::call_without_flags(clier.argv.clone())
     },
   };
 
@@ -100,11 +106,21 @@ pub(crate) fn impl_command(
     },
   };
 
+  let dec_gen_flag_struct = match flag_struct {
+    Some(flag_struct) => quote! {
+        Option<#flag_struct>
+    },
+
+    None => quote! {
+      Option<()>
+    },
+  };
+
   let gen_struct = quote! {
     #[allow(non_camel_case_types, missing_docs)]
     #[derive(Clone, Debug)]
     pub struct #fn_name {
-          flag_struct: Option<#flag_struct>,
+          flag_struct: #dec_gen_flag_struct,
           flag_errors: Vec<clier::hooks::FlagError>
       }
       impl #fn_name {
@@ -115,7 +131,7 @@ pub(crate) fn impl_command(
 
     impl clier::Command for #fn_name {
       fn name(&self) -> &'static str {#fn_name_str}
-      fn description(&self) -> Option<&'static str> {#description}
+      fn description(&self) -> &'static str {#description}
       fn execute(&self, clier: &clier::Clier) -> clier::ExitCode {
         let status_code = #fn_execute_body;
         return status_code;

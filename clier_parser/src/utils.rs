@@ -1,15 +1,19 @@
-pub fn remove_dashdash(args: &[String]) -> (Vec<String>, String) {
+use alloc::{boxed::Box, vec::Vec};
+
+pub fn remove_dashdash<'a>(args: &[&'a str]) -> (Vec<&'a str>, Box<str>) {
   let mut encountered_dash_dash = false;
-  let mut after_double_dash = "".to_string();
-  let args: Vec<String> = args
+  let mut after_double_dash = Vec::new();
+
+  let args: Vec<&str> = args
     .iter()
-    .filter(|arg| match (arg.as_str() == "--" && !encountered_dash_dash, encountered_dash_dash) {
+    .filter(|arg| match (**arg == "--" && !encountered_dash_dash, encountered_dash_dash) {
       (true, _) => {
         encountered_dash_dash = true;
         false
       }
       (false, true) => {
-        after_double_dash.push_str(&format!(" {}", arg.as_str()));
+        after_double_dash.push(" ");
+        after_double_dash.push(arg);
         false
       }
       _ => true,
@@ -21,36 +25,30 @@ pub fn remove_dashdash(args: &[String]) -> (Vec<String>, String) {
     after_double_dash.remove(0);
   }
 
-  (args, after_double_dash)
+  let test = after_double_dash.join("");
+
+  (args, test.into())
 }
 
-pub fn is_short_flag(flag: impl Into<String>) -> bool {
-  let flag = flag.into();
+pub fn is_short_flag(flag: &str) -> bool {
   flag.starts_with('-') && !flag.starts_with("--")
 }
 
-pub fn is_long_flag(flag: impl Into<String>) -> bool {
-  let flag = flag.into();
+pub fn is_long_flag(flag: &str) -> bool {
   flag.starts_with("--") && flag[2..].len() > 1
 }
 
-pub fn strip_dash(flag: impl Into<String>) -> String {
-  let flag = flag.into();
-  let prefix = if is_long_flag(flag.clone()) { "--" } else { "-" };
-  flag.strip_prefix(prefix).map(|v| v.to_string()).expect("Unable to strip dash")
+pub fn strip_dash(flag: &str) -> &str {
+  let prefix = if is_long_flag(flag) { "--" } else { "-" };
+  flag.strip_prefix(prefix).expect("Unable to strip dash")
 }
 
 #[test]
 fn test_dashash() {
-  let result = remove_dashdash(
-    ["command", "--flag=value", "--no-value", "--", "something", "othershit"]
-      .iter()
-      .map(|v| v.to_string())
-      .collect::<Vec<String>>()
-      .as_slice(),
-  );
+  let result =
+    remove_dashdash(&["command", "--flag=value", "--no-value", "--", "something", "othershit"]);
 
-  assert!(result.1 == "something othershit");
+  assert!(&*result.1 == "something othershit");
 }
 
 #[test]
@@ -82,5 +80,5 @@ fn test_strip_dash() {
 
   result = strip_dash("-valid");
 
-  assert_eq!(result, "valid".to_string());
+  assert_eq!(result, "valid");
 }

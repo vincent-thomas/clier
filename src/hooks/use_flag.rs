@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
+use clier_parser::Argv;
+use hashbrown::HashMap;
 use thiserror::Error;
-
-use crate::Clier;
 
 /// FlagError
 #[derive(Debug, Error, Clone)]
@@ -116,21 +114,28 @@ impl Flag {
   }
 }
 /// Using flag
-pub fn use_flag(name: &'static str, short: Option<char>, clier: &Clier) -> Flag {
-  let flags: &HashMap<String, String> = &clier.argv.flags;
-  let contains_name = flags.contains_key(&name.to_string());
-  let contains_short =
-    if let Some(short) = short { flags.contains_key(&short.to_string()) } else { false };
+pub fn use_flag(name: &'static str, short: Option<char>, argv: &Argv) -> Flag {
+  let flags: &HashMap<Box<str>, Box<str>> = &argv.flags;
+  let contains_name = flags.contains_key(name);
+  let contains_short = if let Some(short) = short {
+    let short_str = short.to_string();
+    let short_str = short_str.as_str();
+    flags.contains_key(short_str)
+  } else {
+    false
+  };
 
-  let value = match (contains_name, contains_short) {
+  let value: Option<String> = match (contains_name, contains_short) {
     (false, false) => None,
     (true, _) => {
-      let value: Option<&String> = flags.get(&name.to_string());
-      value.cloned()
+      let value: Option<Box<str>> = flags.get(name).cloned();
+      value.map(|v| v.into())
     }
     (_, true) => {
-      let value: Option<&String> = flags.get(&short.unwrap().to_string());
-      value.cloned()
+      let short_str = short.unwrap().to_string();
+      let short_str = short_str.as_str();
+      let value: Option<Box<str>> = flags.get(short_str).cloned();
+      value.map(|v| v.into())
     }
   };
 

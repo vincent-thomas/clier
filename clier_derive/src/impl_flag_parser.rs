@@ -10,7 +10,6 @@ use syn::{Data, DeriveInput, Fields};
 #[attribute(ident = meta)]
 #[attribute(error(missing_field = "`{field}` was not specified"))]
 struct CollectionAttribute {
-  description: Option<String>,
   short: Option<char>,
 }
 
@@ -26,7 +25,7 @@ pub fn impl_flag_parser(input: DeriveInput) -> TokenStream {
   };
 
   let meta_values = fields.iter().map(|f| {
-    let mut description = None;
+    let mut description = Vec::new();
     let mut short = None;
     let optional;
     if let Type::Path(value) = &f.ty {
@@ -35,10 +34,18 @@ pub fn impl_flag_parser(input: DeriveInput) -> TokenStream {
       panic!("Invalid");
     }
     for attr in &f.attrs {
-      let test = CollectionAttribute::from_attribute(attr).unwrap();
-      if description.is_none() {
-        description = test.description.map(|x| x.replace('\n', "\n      "));
+      if attr.path().is_ident("doc") {
+        let test = attr.path().get_ident().cloned();
+        if let Some(ident) = test {
+          let text = ident.span().source_text().clone();
+          if let Some(text) = text {
+            description.push(text.replace("/// ", ""));
+          }
+        }
+        continue;
       }
+      let test = CollectionAttribute::from_attribute(attr).unwrap();
+
       if short.is_none() {
         short = test.short;
       }
@@ -46,7 +53,12 @@ pub fn impl_flag_parser(input: DeriveInput) -> TokenStream {
     let name = &f.ident;
     let name_str = name.as_ref().unwrap().to_string();
 
-    clier_utils::MetaValue { description, short, long: name_str.clone(), optional }
+    clier_utils::MetaValue {
+      description: description.join("\n"),
+      short,
+      long: name_str.clone(),
+      optional,
+    }
   });
 
   let assignments = meta_values.clone().map(|meta_value| {
@@ -62,17 +74,20 @@ pub fn impl_flag_parser(input: DeriveInput) -> TokenStream {
     };
 
     quote! {
-      #key: clier::hooks::Flag::new(#long.to_string(), args.get(#long).or(#if_short_value).cloned()).try_into().map_err(|e: clier::hooks::FlagError| {error.push(e.clone()); e}).unwrap_or_default()
+      #key: clier::hooks::Flag::new(#long.to_string(), args.get(#long).or(#if_short_value).map(|x| x.clone().into())).try_into().map_err(|e: clier::hooks::FlagError| {error.insert(#long.to_string(),e.clone()); e}).unwrap_or_default()
     }
   });
 
   let assignments2 = meta_values.clone().map(|v| quote! {#v});
   let gen = quote! {
       impl clier::FlagParser for #name {
-          fn parse() -> (Self, Vec<clier::hooks::FlagError>) {
-              let args = clier_parser::Argv::parse().flags;
+          fn parse() -> (Self, std::collections::HashMap<String, clier::hooks::FlagError>) {
+            let raw_args: Vec<String> = std::env::args().collect();
+            let test = raw_args.join(" ");
 
-              let mut error: Vec<clier::hooks::FlagError> = vec![];
+              let args = clier_parser::Argv::from(test.as_str()).flags;
+
+              let mut error: std::collections::HashMap<String, clier::hooks::FlagError> = std::collections::HashMap::new();
               let if_okay = #name {
                   #(#assignments),*
               };
