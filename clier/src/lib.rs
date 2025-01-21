@@ -202,14 +202,10 @@ impl Clier {
     }
 
     if self.argv.commands.is_empty() {
-      match self.commands.get("root") {
-        None => {
-          return self.help();
-        }
-        Some(command) => {
-          return command.execute(&self);
-        }
-      }
+      return match self.commands.get("root") {
+        None => self.help(),
+        Some(command) => command.execute(self),
+      };
     }
 
     let to_match_against = self.argv.commands.join(" ");

@@ -6,13 +6,13 @@ use clier::{prelude::*, Parser};
 fn main(app: &mut clier::Clier) -> ExitCode {
   // This registers the command to the app. This command will run as the function name.
   // For example, if the user provides 'example-program build', this command below will run.
-  app.register(build::new(&app));
+  app.register(build::new(app));
   // Notice, this is fetched based by the function name.
   // The character "_" is translated into " " by the framework so a function named "test_build"
   // will run when user provides example-program test build".
 
   // This registers the command "test" to this function
-  app.register(test::new(&app));
+  app.register(test::new(app));
 
   app.run()
 }

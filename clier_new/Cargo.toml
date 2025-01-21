@@ -1,0 +1,7 @@
+[package]
+name = "clier_new"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clier_new_derive = { path = "../clier_new_derive", version = "0.1.0" }

@@ -20,16 +20,16 @@ fn argv_from() {
   hash.insert("ui".to_string(), "true".to_string());
 
   for flag in hash.clone() {
-    let left = result.flags.get(&flag.0);
+    let left: Option<&Box<str>> = result.flags.get(&flag.0.into());
     let right = Some(&flag.1);
-    if left != right {
+    if left != right.map(|x| x.as_str().into()).as_ref() {
       panic!("Not right flag: {}: {}={:?}", flag.0, flag.1, left);
     }
   }
 
   let commands = ["command".to_string(), "subcommand".to_string()];
   for (i, command) in commands.iter().enumerate() {
-    if result.commands[i] != *command {
+    if result.commands[i] != command.as_str().into() {
       panic!("Not right command: {}", command);
     }
   }

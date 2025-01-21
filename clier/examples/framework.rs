@@ -14,7 +14,7 @@ struct Flags {
 
 /// detta är en kommentar
 #[command(flags = Flags)]
-fn build(argv: Argv, flags: Flags) -> clier::ExitCode {
+fn build(_argv: Argv, flags: Flags) -> clier::ExitCode {
   println!("args {:?}", flags);
   ExitCode(0)
 }

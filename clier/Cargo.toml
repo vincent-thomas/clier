@@ -1,0 +1,25 @@
+[package]
+name = "clier"
+version = "0.7.4"
+edition = "2021"
+authors = ["Vincent Thomas"]
+description = "A cli parser and framework for rust"
+license-file = "../LICENSE"
+repository = "https://github.com/vincent-thomas/clier"
+keywords = ["cli", "framework", "parser"]
+documentation = "https://docs.rs/clier"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+macros = []
+
+[dependencies]
+console = "0.15.7"
+thiserror = "1.0.48"
+clier_parser = {path = "../clier_parser", version = "0.7.3"}
+clier_derive = {path = "../clier_derive", version = "0.1.0"}
+clier_utils = {path = "../clier_utils"}
+hashbrown = "0.14.5"
